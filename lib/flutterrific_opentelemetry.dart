@@ -80,6 +80,7 @@ export 'package:opentelemetry_api/opentelemetry_api.dart'
         InteractionType,
         EnvironmentResource,
         ErrorResource,
+        ErrorSemantics,
         ExceptionResource,
         FeatureFlagResource,
         FileResource,
