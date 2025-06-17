@@ -4,17 +4,12 @@
 import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
 import 'package:flutter/foundation.dart';
 
+import 'otel_config.dart';
+
 /// Helper class to detect platform-specific capabilities and configurations
 class PlatformDetection {
   /// Returns true if the current platform is Flutter Web
   static bool get isWeb => kIsWeb;
-
-  /// Check if the environment has OTEL-related config parameters
-  static bool hasOTelEnvConfig() {
-    final endpointEnv = const String.fromEnvironment('OTEL_EXPORTER_OTLP_ENDPOINT');
-    final protocolEnv = const String.fromEnvironment('OTEL_EXPORTER_OTLP_PROTOCOL');
-    return endpointEnv.isNotEmpty || protocolEnv.isNotEmpty;
-  }
 
   /// Creates the appropriate span exporter based on the current platform and configuration
   ///
@@ -32,11 +27,10 @@ class PlatformDetection {
     bool insecure = false,
   }) {
     // Get endpoint from environment variable if not provided
-    final envEndpoint = const String.fromEnvironment('OTEL_EXPORTER_OTLP_ENDPOINT');
-    final resolvedEndpoint = endpoint ?? (envEndpoint.isNotEmpty ? envEndpoint : 'http://localhost:4317');
+    final resolvedEndpoint = OTelConfig.endpointEnv;
 
     // Get protocol from environment variable
-    final envProtocol = const String.fromEnvironment('OTEL_EXPORTER_OTLP_PROTOCOL');
+    final envProtocol = OTelConfig.protocolEnv;
 
     // Determine if we should use HTTP/protobuf
     bool useHttp = isWeb; // Always use HTTP for web

@@ -4,6 +4,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart' as sdk;
+import '../../flutterrific_opentelemetry.dart';
 import './nav_util.dart';
 import 'otel_route_data.dart';
 
@@ -61,6 +62,7 @@ class OTelGoRouterRedirect {
       routePath: state.fullPath ?? state.path ?? state.uri.toString(),
       routeArguments: state.pathParameters.toString(),
       routeKey: state.pageKey.value,
+      routeSpanId: OTel.spanId(), //NB: Route SpanIds are generated here
       //TODO extra, error
     );
   }

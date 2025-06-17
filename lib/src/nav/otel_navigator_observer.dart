@@ -3,6 +3,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
+import '../../flutterrific_opentelemetry.dart';
 import './nav_util.dart';
 import 'otel_route_data.dart';
 
@@ -106,6 +107,7 @@ class OTelNavigatorObserver extends NavigatorObserver {
     }
 
     return OTelRouteData(
+      routeSpanId: OTel.spanId(), //NB: Route SpanIds are generated here
       routeName: routeName,
       routePath: routePath,
       routeKey: routeKey.toString(),

@@ -159,7 +159,7 @@ void main() {
 
       // Verify initial route is set
       expect(navigatorObserver.currentRouteData, isNotNull);
-      expect(navigatorObserver.currentRouteData?.routeId, isNotNull);
+      expect(navigatorObserver.currentRouteData?.routeSpanId, isNotNull);
 
       // Print debug info
       print('Finding navigable elements: ${find.byType(ElevatedButton).evaluate().length}');
@@ -263,7 +263,7 @@ void main() {
       await tester.pump();
 
       // Verify the observers still have their state
-      expect(FlutterOTel.routeObserver.currentRouteData?.routeId, isNotNull);
+      expect(FlutterOTel.routeObserver.currentRouteData?.routeSpanId, isNotNull);
       expect(FlutterOTel.lifecycleObserver.currentAppLifecycleId, isNotNull);
 
       // Verify current route

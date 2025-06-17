@@ -44,7 +44,7 @@ class UISpan implements Span {
       _delegate.addAttributes(attributes);
 
   @override
-  void addEvent(SpanEvent spanEvent) => _delegate.addEvent(spanEvent);
+  void addEvent(SpanEvent spanEvent, [Attributes? attributes]) => _delegate.addEvent(spanEvent);
 
   @override
   void addEventNow(String name, [Attributes? attributes]) =>
@@ -174,7 +174,6 @@ class UISpan implements Span {
 
   @override
   bool isInstanceOf(Type type) {
-    // TODO: implement isInstanceOf
-    throw UnimplementedError();
+    return Type == this.runtimeType;
   }
 }

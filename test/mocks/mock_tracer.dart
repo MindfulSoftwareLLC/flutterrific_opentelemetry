@@ -50,25 +50,6 @@ class MockUITracer extends Mock implements UITracer {
   }
 
   @override
-  UISpan startNavigationChangeSpan({
-    required String newRouteName,
-    required String newRoutePath,
-    required String newRouteKey,
-    required String newRouteArguments,
-    required Uint8List newRouteId,
-    required DateTime newRouteStartTime,
-    required String? previousRouteName,
-    required String? previousRoutePath,
-    required Uint8List? previousRouteId,
-    required NavigationAction routeChangeType,
-    required Duration? routeDuration,
-  }) {
-    final span = MockSpan();
-    _createdSpans.add(span);
-    return span;
-  }
-
-  @override
   bool get enabled => _enabled;
 
   @override

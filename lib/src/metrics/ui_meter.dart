@@ -308,7 +308,7 @@ class _ScreenBoundHistogram<T extends num> implements Histogram<T>, SDKInstrumen
   }
 
   @override
-  List<MetricPoint<T>> collectPoints() {
+  List<MetricPoint<HistogramValue>> collectPoints() {
     return _delegate.collectPoints();
   }
 
@@ -355,5 +355,5 @@ class _ScreenBoundHistogram<T extends num> implements Histogram<T>, SDKInstrumen
   }
 
   @override
-  T getValue([Attributes? attributes]) => _delegate.getValue(attributes);
+  HistogramValue getValue([Attributes? attributes]) => _delegate.getValue(attributes);
 }

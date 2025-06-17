@@ -20,11 +20,11 @@ void recordNavigationChange(
     newRouteData.routePath,
     newRouteData.routeKey,
     newRouteData.routeArguments,
-    newRouteData.routeId,
+    newRouteData.routeSpanId,
     newRouteData.timestamp,
     previousRouteData?.routeName,
     previousRouteData?.routePath,
-    previousRouteData?.routeId,
+    previousRouteData?.routeSpanId,
     newRouteChangeType,
     routeDuration,
   );

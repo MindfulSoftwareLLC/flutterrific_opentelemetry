@@ -271,7 +271,7 @@ class FlutterOTel {
       tracerVersion: tracerVersion,
       resourceAttributes: resourceAttributes,
       spanProcessor: spanProcessor,
-      sampler: sampler,
+      sampler: sampler ?? AlwaysOnSampler(),
       spanKind: spanKind,
       metricExporter: metricExporter,
       metricReader: metricReader,
@@ -476,38 +476,44 @@ class FlutterOTel {
     StackTrace? stackTrace, {
     Map<String, dynamic>? attributes,
   }) {
-    if (OTelFactory.otelFactory == null) {
-      debugPrint('Error before OTel initialization: $message, $error');
-      debugPrintStack(stackTrace: stackTrace);
-      return; //cannot, too early
+    try {
+      OTelLog.error('Flutter error reported: $message \nStack: $stackTrace');
+      if (OTelFactory.otelFactory == null) {
+        debugPrint('Error before OTel initialization: $message, $error');
+        debugPrintStack(stackTrace: stackTrace);
+        return; //cannot, too early
+      }
+      if (!tracer.enabled) return;
+
+      // Create attribute map
+      final errorAttributes = <String, Object>{
+        'error.context': message,
+        'error.type': error.runtimeType.toString(),
+        'error.message': error.toString(),
+        ...?attributes,
+      };
+
+      // Record as span
+      final span = tracer.startSpan(
+        'error.$message',
+        kind: SpanKind.client,
+        attributes: errorAttributes.toAttributes(),
+      );
+
+      span.recordException(error, stackTrace: stackTrace, escaped: true);
+      span.setStatus(SpanStatusCode.Error, error.toString());
+      span.end();
+
+      // Also record as a metric counter
+      meter(name: 'flutter.errors').createCounter(
+        name: 'error.count',
+        description: 'Error counter',
+        unit: '{errors}',
+      ).add(1, errorAttributes.toAttributes());
+    } catch (e,s) {
+      // TODO - best alternative?
+      OTelLog.error('Error when reporting the Flutter error: $e \n$s');
     }
-    if (!tracer.enabled) return;
-
-    // Create attribute map
-    final errorAttributes = <String, Object>{
-      'error.context': message,
-      'error.type': error.runtimeType.toString(),
-      'error.message': error.toString(),
-      ...?attributes,
-    };
-
-    // Record as span
-    final span = tracer.startSpan(
-      'error.$message',
-      kind: SpanKind.client,
-      attributes: errorAttributes.toAttributes(),
-    );
-
-    span.recordException(error, stackTrace: stackTrace, escaped: true);
-    span.setStatus(SpanStatusCode.Error, error.toString());
-    span.end();
-
-    // Also record as a metric counter
-    meter(name: 'flutter.errors').createCounter(
-      name: 'error.count',
-      description: 'Error counter',
-      unit: '{errors}',
-    ).add(1, errorAttributes.toAttributes());
   }
 
   /// Records a performance metric

@@ -255,7 +255,7 @@ void main() {
       expect(find.byKey(const Key('home_page')), findsOneWidget);
 
       // Initial route should be tracked
-      expect(FlutterOTel.routeObserver.currentRouteData?.routeId, isNotNull);
+      expect(FlutterOTel.routeObserver.currentRouteData?.routeSpanId, isNotNull);
       expect(FlutterOTel.routeObserver.currentRouteData, isNotNull);
 
       // Navigate to profile page using direct router navigation

@@ -183,7 +183,7 @@ void main() {
       expect(find.byKey(const Key('first_page')), findsOneWidget);
 
       // Initial route should be tracked
-      expect(navigatorObserver.currentRouteData?.routeId, isNotNull);
+      expect(navigatorObserver.currentRouteData?.routeSpanId, isNotNull);
       expect(navigatorObserver.currentRouteData?.timestamp, isNotNull);
       expect(navigatorObserver.currentRouteData, isNotNull);
       expect(navigatorObserver.currentRouteData?.routeName, isNotEmpty);
@@ -197,7 +197,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Save initial route data
-      final initialRouteId = navigatorObserver.currentRouteData?.routeId;
+      final initialRouteId = navigatorObserver.currentRouteData?.routeSpanId;
       final initialRouteData = navigatorObserver.currentRouteData;
 
       // Use direct router navigation instead of tapping the button
@@ -213,12 +213,12 @@ void main() {
       expect(find.byKey(const Key('second_page')), findsOneWidget);
 
       // Route data should be updated
-      expect(navigatorObserver.currentRouteData?.routeId, isNot(equals(initialRouteId)));
+      expect(navigatorObserver.currentRouteData?.routeSpanId, isNot(equals(initialRouteId)));
       expect(navigatorObserver.currentRouteData?.routeName, isNot(equals(initialRouteData?.routeName)));
       expect(navigatorObserver.currentRouteData?.routePath, contains('/second'));
 
       // Save second route data
-      final secondRouteId = navigatorObserver.currentRouteData?.routeId;
+      final secondRouteId = navigatorObserver.currentRouteData?.routeSpanId;
 
       // Navigate to third page with parameter
       print('Navigating to /third/123');
@@ -229,7 +229,7 @@ void main() {
       expect(find.byKey(const Key('third_page')), findsOneWidget);
 
       // Route data should be updated again
-      expect(navigatorObserver.currentRouteData?.routeId, isNot(equals(secondRouteId)));
+      expect(navigatorObserver.currentRouteData?.routeSpanId, isNot(equals(secondRouteId)));
       expect(navigatorObserver.currentRouteData?.routeName, isNotEmpty);
       expect(navigatorObserver.currentRouteData?.routePath, contains('/third/'));
 
@@ -252,7 +252,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Save initial route data
-      final initialRouteId = navigatorObserver.currentRouteData?.routeId;
+      final initialRouteId = navigatorObserver.currentRouteData?.routeSpanId;
 
       // Navigate to second page
       router.go('/second');
@@ -263,7 +263,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Route data should be updated
-      expect(navigatorObserver.currentRouteData?.routeId, isNot(equals(initialRouteId)));
+      expect(navigatorObserver.currentRouteData?.routeSpanId, isNot(equals(initialRouteId)));
       expect(navigatorObserver.currentRouteData?.routeName, isNotEmpty);
       expect(navigatorObserver.currentRouteData?.routePath, contains('/third/'));
     }, timeout: const Timeout(Duration(seconds: 10)));
@@ -279,7 +279,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Save second route data
-      final secondRouteId = navigatorObserver.currentRouteData?.routeId;
+      final secondRouteId = navigatorObserver.currentRouteData?.routeSpanId;
 
       // Navigate to second page's details subroute
       router.go('/second/details');
@@ -293,7 +293,7 @@ void main() {
       expect(find.byKey(const Key('second_details_page')), findsOneWidget);
 
       // Route data should be updated and should contain subroute info
-      expect(navigatorObserver.currentRouteData?.routeId, isNot(equals(secondRouteId)));
+      expect(navigatorObserver.currentRouteData?.routeSpanId, isNot(equals(secondRouteId)));
       expect(navigatorObserver.currentRouteData?.routePath, contains('/second/details'));
 
       // Navigate back to second page from subroute
@@ -361,7 +361,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Save initial route data
-      final initialRouteId = navigatorObserver.currentRouteData?.routeId;
+      final initialRouteId = navigatorObserver.currentRouteData?.routeSpanId;
       final initialRouteData = navigatorObserver.currentRouteData;
 
       print('Initial route: ${initialRouteData?.routeName}');
@@ -377,12 +377,12 @@ void main() {
       expect(find.byKey(const Key('details_page')), findsOneWidget);
 
       // Route data should be updated
-      expect(navigatorObserver.currentRouteData?.routeId, isNot(equals(initialRouteId)));
+      expect(navigatorObserver.currentRouteData?.routeSpanId, isNot(equals(initialRouteId)));
       expect(navigatorObserver.currentRouteData?.routeName, isNot(equals(initialRouteData?.routeName)));
       expect(navigatorObserver.currentRouteData?.routePath, contains('details'));
 
       // Save details route data
-      final detailsRouteId = navigatorObserver.currentRouteData?.routeId;
+      final detailsRouteId = navigatorObserver.currentRouteData?.routeSpanId;
 
       // Navigate back to home
       await tester.tap(find.byKey(const Key('go_back')));
@@ -392,7 +392,7 @@ void main() {
       expect(find.byKey(const Key('home_page')), findsOneWidget);
 
       // We should be back at home
-      expect(navigatorObserver.currentRouteData?.routeId, isNot(equals(detailsRouteId)));
+      expect(navigatorObserver.currentRouteData?.routeSpanId, isNot(equals(detailsRouteId)));
     }, timeout: const Timeout(Duration(seconds: 10)));
   });
 

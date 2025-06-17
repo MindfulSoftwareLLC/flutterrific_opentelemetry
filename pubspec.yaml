@@ -1,6 +1,6 @@
 name: flutterrific_opentelemetry
 description: "A Flutter package for OpenTelemetry based on dartastic_opentelemetry"
-version: 0.3.0
+version: 0.3.1
 homepage: https://dartastic.io
 repository: https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry.git
 
@@ -11,8 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  dartastic_opentelemetry: ^0.8.1
-  dartastic_opentelemetry_api: ^0.8.0
+  dartastic_opentelemetry: ^0.8.6
+  dartastic_opentelemetry_api: ^0.8.3
   #TODO - need to manage go_router dependency versions and no-go-router implementation
   go_router: ^14.8.1
   meta: ^1.16.0

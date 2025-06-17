@@ -10,22 +10,23 @@ class OTelRouteData {
   final String routeName;
 
   /// a spanId equivalent for a route
-  final Uint8List routeId;
+  final sdk.SpanId routeSpanId;
   final String routePath;
   final String routeArguments;
   final String routeKey;
   final DateTime timestamp;
 
   OTelRouteData({
+    required this.routeSpanId,
     required this.routeName,
     required this.routePath,
     required this.routeArguments,
     required this.routeKey,
-  }) : routeId = sdk.OTel.spanId().bytes,
-        timestamp = DateTime.now();
+  }) : timestamp = DateTime.now();
 
   static OTelRouteData empty() {
     return OTelRouteData(
+      routeSpanId: sdk.OTel.spanIdInvalid(),
       routeName: '',
       routePath: '',
       routeArguments: '',

@@ -1,18 +1,27 @@
-# OpenTelemetry SDK for Flutter
+# Flutterrific OpenTelemetry SDK for Flutter
 
 [![pub.dev](https://img.shields.io/pub/v/flutterrific_opentelemetry.svg)](https://pub.dev/packages/flutterrific_opentelemetry)
-[![Flutter CI](https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry/actions/workflows/flutter.yml/badge.svg)](https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry/actions/workflows/flutter.yml)
-[![codecov](https://codecov.io/gh/MindfulSoftwareLLC/flutterrific_opentelemetry/branch/main/graph/badge.svg)](https://codecov.io/gh/MindfulSoftwareLLC/flutterrific_opentelemetry)
+
+[//]: # ([![Flutter CI]&#40;https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry/actions/workflows/flutter.yml/badge.svg&#41;]&#40;https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry/actions/workflows/flutter.yml&#41;)
+
+[//]: # ([![codecov]&#40;https://codecov.io/gh/MindfulSoftwareLLC/flutterrific_opentelemetry/branch/main/graph/badge.svg&#41;]&#40;https://codecov.io/gh/MindfulSoftwareLLC/flutterrific_opentelemetry&#41;)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-An OpenTelemetry SDK for Flutter applications built on the [Dartastic OpenTelemetry SDK](https://pub.dev/packages/dartastic_opentelemetry), providing comprehensive observability for Flutter applications across all platforms.
+Flutterrific OTel is an OpenTelemetry SDK for Flutter applications built on the [Dartastic OpenTelemetry SDK](https://pub.dev/packages/dartastic_opentelemetry), providing comprehensive observability for Flutter applications across all platforms.
+
+## Demo
+
+The [Wondrous OpenTelemetry](https://pub.dev/packages/wondrous_opentelemetry) project instruments tha Wondrous app for observability with Flutterrific OTel. Watch your own journey.
 
 ## Overview
 
-This Flutter SDK implements the [OpenTelemetry](https://opentelemetry.io/) specification, enabling developers to collect distributed traces, metrics, and logs from Flutter applications. OpenTelemetry is the second most active [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) project after Kubernetes, providing a vendor-neutral standard for observability.
+This Flutter SDK implements the [OpenTelemetry](https://opentelemetry.io/) specification, enabling developers to collect distributed traces and metrics from Flutter applications (logs coming soon). OpenTelemetry is a vendor-neutral standard for observability and is the second most active [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) project, after Kubernetes.
 
 ## Why OpenTelemetry for Flutter?
 
+- **Report Errors**: Get notified of errors in real time.
+- **Watch Your Users**: Where do users spend their time? Increase conversion rates. 
+- **Get Metrics**: How fast do your routes load IRL?
 - **Future-Proof**: OpenTelemetry is an industry standard with broad ecosystem support
 - **Vendor Neutral**: Works with any OpenTelemetry-compatible backend
 - **Comprehensive**: Covers traces, metrics, and logs in a unified approach
@@ -155,7 +164,7 @@ Standard OpenTelemetry environment variables are supported:
 
 ### Local Development
 
-For local development, run an OpenTelemetry collector:
+For local development, run an OpenTelemetry collector on localhost:4317, the default. 
 
 ```bash
 docker run -p 4317:4317 -p 4318:4318 --rm -ti grafana/otel-lgtm

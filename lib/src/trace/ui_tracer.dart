@@ -158,11 +158,11 @@ class UITracer implements sdk.Tracer {
     String newRoutePath,
     String newRouteKey,
     String newRouteArguments,
-    Uint8List newRouteId,
+    sdk.SpanId routeSpanId,
     DateTime newRouteStartTime,
     String? previousRouteName,
     String? previousRoutePath,
-    Uint8List? previousRouteId,
+    sdk.SpanId? previousRouteSpanId,
     sdk.NavigationAction newRouteChangeType,
     Duration? routeDuration,
   ) {
@@ -171,11 +171,11 @@ class UITracer implements sdk.Tracer {
       newRoutePath: newRoutePath,
       newRouteKey: newRouteKey,
       newRouteArguments: newRouteArguments,
-      newRouteId: newRouteId,
+      routeSpanId: routeSpanId,
       newRouteStartTime: newRouteStartTime,
       previousRouteName: previousRouteName,
       previousRoutePath: previousRoutePath,
-      previousRouteId: previousRouteId,
+      previousRouteId: previousRouteSpanId,
       routeChangeType: newRouteChangeType,
       routeDuration: routeDuration,
     );
@@ -190,11 +190,11 @@ class UITracer implements sdk.Tracer {
     required String newRoutePath,
     required String newRouteKey,
     required String newRouteArguments,
-    required Uint8List newRouteId,
+    required sdk.SpanId routeSpanId,
     required DateTime newRouteStartTime,
     required String? previousRouteName,
     required String? previousRoutePath,
-    required Uint8List? previousRouteId,
+    required sdk.SpanId? previousRouteId,
     required api.NavigationAction routeChangeType,
     required Duration? routeDuration,
   }) {
@@ -208,7 +208,7 @@ class UITracer implements sdk.Tracer {
       api.NavigationSemantics.routePath.key: newRoutePath,
       api.NavigationSemantics.routeKey.key: newRouteKey,
       api.NavigationSemantics.routeArguments.key: newRouteArguments,
-      api.NavigationSemantics.routeId.key: newRouteId,
+      api.NavigationSemantics.routeId.key: routeSpanId.hexString,
       api.NavigationSemantics.routeTimestamp.key: newRouteStartTime,
       api.NavigationSemantics.navigationAction.key: routeChangeType.toString(),
     };
@@ -221,7 +221,7 @@ class UITracer implements sdk.Tracer {
           previousRoutePath;
     }
     if (previousRouteId != null) {
-      attrMap[api.NavigationSemantics.previousRouteId.key] = previousRouteId;
+      attrMap[api.NavigationSemantics.previousRouteId.key] = previousRouteId.hexString;
     }
     if (routeDuration != null) {
       attrMap[api.NavigationSemantics.previousRouteDuration.key] =
