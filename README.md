@@ -11,7 +11,8 @@ Flutterrific OTel is an OpenTelemetry SDK for Flutter applications built on the 
 
 ## Demo
 
-The [Wondrous OpenTelemetry](https://pub.dev/packages/wondrous_opentelemetry) project instruments tha Wondrous app for observability with Flutterrific OTel. Watch your own journey.
+The [Wondrous OpenTelemetry](https://github.com/MindfulSoftwareLLC/flutter-wonderous-app-opentelemetry) project instruments the Wondrous App for observability with Flutterrific OTel. 
+The `main.dart` and `router.dart` show how to set up your app with Flutterrific OpenTelemetry.
 
 ## Overview
 
