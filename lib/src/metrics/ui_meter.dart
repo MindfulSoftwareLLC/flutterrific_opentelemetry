@@ -44,10 +44,11 @@ class UIMeter implements Meter {
     String? unit,
   }) {
     return _delegate.createCounter<T>(
-      name: name,
-      description: description,
-      unit: unit,
-    ) as Counter<T>;
+          name: name,
+          description: description,
+          unit: unit,
+        )
+        as Counter<T>;
   }
 
   @override
@@ -58,11 +59,12 @@ class UIMeter implements Meter {
     List<double>? boundaries,
   }) {
     return _delegate.createHistogram<T>(
-      name: name,
-      description: description,
-      unit: unit,
-      boundaries: boundaries,
-    ) as Histogram<T>;
+          name: name,
+          description: description,
+          unit: unit,
+          boundaries: boundaries,
+        )
+        as Histogram<T>;
   }
 
   @override
@@ -72,10 +74,11 @@ class UIMeter implements Meter {
     String? unit,
   }) {
     return _delegate.createUpDownCounter<T>(
-      name: name,
-      description: description,
-      unit: unit,
-    ) as UpDownCounter<T>;
+          name: name,
+          description: description,
+          unit: unit,
+        )
+        as UpDownCounter<T>;
   }
 
   @override
@@ -85,10 +88,11 @@ class UIMeter implements Meter {
     String? unit,
   }) {
     return _delegate.createGauge(
-      name: name,
-      description: description,
-      unit: unit,
-    ) as Gauge<T>;
+          name: name,
+          description: description,
+          unit: unit,
+        )
+        as Gauge<T>;
   }
 
   @override
@@ -99,11 +103,12 @@ class UIMeter implements Meter {
     ObservableCallback<T>? callback,
   }) {
     return _delegate.createObservableCounter<T>(
-      name: name,
-      description: description,
-      unit: unit,
-      callback: callback,
-    ) as ObservableCounter<T>;
+          name: name,
+          description: description,
+          unit: unit,
+          callback: callback,
+        )
+        as ObservableCounter<T>;
   }
 
   @override
@@ -114,11 +119,12 @@ class UIMeter implements Meter {
     ObservableCallback<T>? callback,
   }) {
     return _delegate.createObservableGauge<T>(
-      name: name,
-      description: description,
-      unit: unit,
-      callback: callback,
-    ) as ObservableGauge<T>;
+          name: name,
+          description: description,
+          unit: unit,
+          callback: callback,
+        )
+        as ObservableGauge<T>;
   }
 
   @override
@@ -129,11 +135,12 @@ class UIMeter implements Meter {
     ObservableCallback<T>? callback,
   }) {
     return _delegate.createObservableUpDownCounter<T>(
-      name: name,
-      description: description,
-      unit: unit,
-      callback: callback,
-    ) as ObservableUpDownCounter<T>;
+          name: name,
+          description: description,
+          unit: unit,
+          callback: callback,
+        )
+        as ObservableUpDownCounter<T>;
   }
 
   /// Records a UI observation with the given value and attributes.
@@ -196,9 +203,7 @@ class UIMeter implements Meter {
   }
 
   /// Creates a frame duration histogram
-  Histogram<double> createFrameDurationHistogram({
-    String? description,
-  }) {
+  Histogram<double> createFrameDurationHistogram({String? description}) {
     return createHistogram<double>(
       name: 'frame.duration',
       description: description ?? 'Frame render duration',
@@ -217,9 +222,10 @@ class _ScreenBoundCounter<T extends num> implements Counter<T> {
   @override
   void add(T value, [Attributes? attributes]) {
     // Add the screen attribute to the provided attributes
-    final screenAttributes = attributes == null
-        ? <String, Object>{'screen': _screen}.toAttributes()
-        : attributes.copyWithStringAttribute('screen', _screen);
+    final screenAttributes =
+        attributes == null
+            ? <String, Object>{'screen': _screen}.toAttributes()
+            : attributes.copyWithStringAttribute('screen', _screen);
 
     _delegate.add(value, screenAttributes);
   }
@@ -283,7 +289,8 @@ class _ScreenBoundCounter<T extends num> implements Counter<T> {
 }
 
 /// A Histogram that automatically adds a screen attribute to all measurements.
-class _ScreenBoundHistogram<T extends num> implements Histogram<T>, SDKInstrument {
+class _ScreenBoundHistogram<T extends num>
+    implements Histogram<T>, SDKInstrument {
   final Histogram<T> _delegate;
   final String _screen;
 
@@ -292,9 +299,10 @@ class _ScreenBoundHistogram<T extends num> implements Histogram<T>, SDKInstrumen
   @override
   void record(T value, [Attributes? attributes]) {
     // Add the screen attribute to the provided attributes
-    final screenAttributes = attributes == null
-        ? <String, Object>{'screen': _screen}.toAttributes()
-        : attributes.copyWithStringAttribute('screen', _screen);
+    final screenAttributes =
+        attributes == null
+            ? <String, Object>{'screen': _screen}.toAttributes()
+            : attributes.copyWithStringAttribute('screen', _screen);
 
     _delegate.record(value, screenAttributes);
   }
@@ -355,5 +363,6 @@ class _ScreenBoundHistogram<T extends num> implements Histogram<T>, SDKInstrumen
   }
 
   @override
-  HistogramValue getValue([Attributes? attributes]) => _delegate.getValue(attributes);
+  HistogramValue getValue([Attributes? attributes]) =>
+      _delegate.getValue(attributes);
 }

@@ -47,15 +47,14 @@ class SecondPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       key: Key('second_page'),
-      body: Center(
-        child: Text('Second Page', key: Key('second_page_title')),
-      ),
+      body: Center(child: Text('Second Page', key: Key('second_page_title'))),
     );
   }
 }
 
 // Mock classes
 class MockTracerProvider extends Mock implements sdk.TracerProvider {}
+
 class MockSpan extends Mock implements sdk.Span {}
 
 void main() {
@@ -79,7 +78,9 @@ void main() {
       await FlutterOTel.reset();
     });
 
-    testWidgets('Should create spans on lifecycle state changes', (tester) async {
+    testWidgets('Should create spans on lifecycle state changes', (
+      tester,
+    ) async {
       // Initial state initialization should have created a span already
 
       // Create a widget that uses WidgetsBindingObserver
@@ -88,9 +89,7 @@ void main() {
           home: Scaffold(
             body: Builder(
               builder: (context) {
-                return const Center(
-                  child: Text('Test App'),
-                );
+                return const Center(child: Text('Test App'));
               },
             ),
           ),
@@ -151,42 +150,51 @@ void main() {
       await FlutterOTel.reset();
     });
 
-    testWidgets('Should create spans on route changes', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'Should create spans on route changes',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
 
-      // Verify initial route is set
-      expect(navigatorObserver.currentRouteData, isNotNull);
-      expect(navigatorObserver.currentRouteData?.routeSpanId, isNotNull);
+        // Verify initial route is set
+        expect(navigatorObserver.currentRouteData, isNotNull);
+        expect(navigatorObserver.currentRouteData?.routeSpanId, isNotNull);
 
-      // Print debug info
-      print('Finding navigable elements: ${find.byType(ElevatedButton).evaluate().length}');
+        // Print debug info
+        print(
+          'Finding navigable elements: ${find.byType(ElevatedButton).evaluate().length}',
+        );
 
-      // Ensure the first page is showing
-      expect(find.byKey(const Key('first_page')), findsOneWidget);
-      expect(find.byKey(const Key('navigate_button')), findsOneWidget);
+        // Ensure the first page is showing
+        expect(find.byKey(const Key('first_page')), findsOneWidget);
+        expect(find.byKey(const Key('navigate_button')), findsOneWidget);
 
-      // Use direct router navigation instead of tapping the button
-      router.go('/second');
-      await tester.pumpAndSettle();
+        // Use direct router navigation instead of tapping the button
+        router.go('/second');
+        await tester.pumpAndSettle();
 
-      // Print the current route for debugging
-      print('Current route path: ${navigatorObserver.currentRouteData?.routePath}');
-      print('Current route name: ${navigatorObserver.currentRouteData?.routeName}');
+        // Print the current route for debugging
+        print(
+          'Current route path: ${navigatorObserver.currentRouteData?.routePath}',
+        );
+        print(
+          'Current route name: ${navigatorObserver.currentRouteData?.routeName}',
+        );
 
-      // Verify the second page is showing
-      expect(find.byKey(const Key('second_page')), findsOneWidget);
+        // Verify the second page is showing
+        expect(find.byKey(const Key('second_page')), findsOneWidget);
 
-      // Verify route change was processed in the observer
-      expect(navigatorObserver.currentRouteData?.routePath, equals('/second/details'));
-    }, timeout: const Timeout(Duration(seconds: 10)));
+        // Verify route change was processed in the observer
+        expect(
+          navigatorObserver.currentRouteData?.routePath,
+          equals('/second/details'),
+        );
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
 
     testWidgets('Should handle various navigation actions', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       await tester.pumpAndSettle();
 
       // Test push
@@ -243,10 +251,10 @@ void main() {
       await FlutterOTel.reset();
     });
 
-    testWidgets('Should handle lifecycle and navigation events together', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
+    testWidgets('Should handle lifecycle and navigation events together', (
+      tester,
+    ) async {
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       await tester.pumpAndSettle();
 
       // Use direct router navigation instead of button tap
@@ -263,11 +271,17 @@ void main() {
       await tester.pump();
 
       // Verify the observers still have their state
-      expect(FlutterOTel.routeObserver.currentRouteData?.routeSpanId, isNotNull);
+      expect(
+        FlutterOTel.routeObserver.currentRouteData?.routeSpanId,
+        isNotNull,
+      );
       expect(FlutterOTel.lifecycleObserver.currentAppLifecycleId, isNotNull);
 
       // Verify current route
-      expect(FlutterOTel.routeObserver.currentRouteData?.routePath, contains('second'));
+      expect(
+        FlutterOTel.routeObserver.currentRouteData?.routePath,
+        contains('second'),
+      );
     });
   });
 }

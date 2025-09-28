@@ -56,11 +56,12 @@ class OTelFlutterFactory extends OTelSDKFactory {
   }) {
     return UIMeterProviderCreate.create(
       super.meterProvider(
-        endpoint: endpoint,
-        serviceVersion: serviceVersion,
-        serviceName: serviceName,
-        resource: resource,
-      ) as MeterProvider,
+            endpoint: endpoint,
+            serviceVersion: serviceVersion,
+            serviceName: serviceName,
+            resource: resource,
+          )
+          as MeterProvider,
     );
   }
 }

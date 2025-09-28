@@ -18,7 +18,8 @@ class MockLifecycleApp extends StatefulWidget {
   State<MockLifecycleApp> createState() => _MockLifecycleAppState();
 }
 
-class _MockLifecycleAppState extends State<MockLifecycleApp> with WidgetsBindingObserver {
+class _MockLifecycleAppState extends State<MockLifecycleApp>
+    with WidgetsBindingObserver {
   AppLifecycleState? _lastLifecycleState;
 
   @override
@@ -48,7 +49,9 @@ class _MockLifecycleAppState extends State<MockLifecycleApp> with WidgetsBinding
     return MaterialApp(
       home: Scaffold(
         body: Center(
-          child: Text('Current lifecycle state: ${_lastLifecycleState?.toString() ?? 'unknown'}'),
+          child: Text(
+            'Current lifecycle state: ${_lastLifecycleState?.toString() ?? 'unknown'}',
+          ),
         ),
       ),
     );
@@ -76,13 +79,20 @@ void main() {
       await FlutterOTel.reset();
     });
 
-    testWidgets('Should create initial lifecycle state on instantiation', (tester) async {
-      expect(lifecycleObserver.currentAppLifecycleState, equals(AppLifecycleStates.active));
+    testWidgets('Should create initial lifecycle state on instantiation', (
+      tester,
+    ) async {
+      expect(
+        lifecycleObserver.currentAppLifecycleState,
+        equals(AppLifecycleStates.active),
+      );
       expect(lifecycleObserver.currentAppLifecycleId, isNotNull);
       expect(lifecycleObserver.currentAppLifecycleStartTime, isNotNull);
     });
 
-    testWidgets('Should update state when app lifecycle changes', (tester) async {
+    testWidgets('Should update state when app lifecycle changes', (
+      tester,
+    ) async {
       // Save current state values
       final initialStateId = lifecycleObserver.currentAppLifecycleId;
       final initialState = lifecycleObserver.currentAppLifecycleState;
@@ -91,12 +101,23 @@ void main() {
       lifecycleObserver.didChangeAppLifecycleState(AppLifecycleState.paused);
 
       // Verify state has been updated
-      expect(lifecycleObserver.currentAppLifecycleId, isNot(equals(initialStateId)));
-      expect(lifecycleObserver.currentAppLifecycleState, isNot(equals(initialState)));
-      expect(lifecycleObserver.currentAppLifecycleState?.name, equals(AppLifecycleState.paused.name));
+      expect(
+        lifecycleObserver.currentAppLifecycleId,
+        isNot(equals(initialStateId)),
+      );
+      expect(
+        lifecycleObserver.currentAppLifecycleState,
+        isNot(equals(initialState)),
+      );
+      expect(
+        lifecycleObserver.currentAppLifecycleState?.name,
+        equals(AppLifecycleState.paused.name),
+      );
     });
 
-    testWidgets('Should receive lifecycle events from Flutter binding', (tester) async {
+    testWidgets('Should receive lifecycle events from Flutter binding', (
+      tester,
+    ) async {
       bool lifecycleCallbackTriggered = false;
 
       await tester.pumpWidget(
@@ -115,7 +136,9 @@ void main() {
       expect(lifecycleCallbackTriggered, isTrue);
     });
 
-    testWidgets('Should handle complete lifecycle event sequence', (tester) async {
+    testWidgets('Should handle complete lifecycle event sequence', (
+      tester,
+    ) async {
       // Save current state
       final initialState = lifecycleObserver.currentAppLifecycleState;
 
@@ -136,13 +159,25 @@ void main() {
         lifecycleObserver.didChangeAppLifecycleState(state);
 
         // Verify values changed
-        expect(lifecycleObserver.currentAppLifecycleId, isNot(equals(beforeId)));
-        expect(lifecycleObserver.currentAppLifecycleState?.name, equals(state.name));
+        expect(
+          lifecycleObserver.currentAppLifecycleId,
+          isNot(equals(beforeId)),
+        );
+        expect(
+          lifecycleObserver.currentAppLifecycleState?.name,
+          equals(state.name),
+        );
       }
 
       // Final state should be resumed
-      expect(lifecycleObserver.currentAppLifecycleState?.name, equals(AppLifecycleState.resumed.name));
-      expect(lifecycleObserver.currentAppLifecycleState, isNot(equals(initialState)));
+      expect(
+        lifecycleObserver.currentAppLifecycleState?.name,
+        equals(AppLifecycleState.resumed.name),
+      );
+      expect(
+        lifecycleObserver.currentAppLifecycleState,
+        isNot(equals(initialState)),
+      );
     });
 
     testWidgets('Should dispose properly', (tester) async {
@@ -197,137 +232,165 @@ void main() {
       await FlutterOTel.reset();
     });
 
-    testWidgets('Should create spans for lifecycle changes', (tester) async {
-      // Create a widget
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text('Test App'),
+    testWidgets(
+      'Should create spans for lifecycle changes',
+      (tester) async {
+        // Create a widget
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(body: Center(child: Text('Test App'))),
           ),
-        ),
-      ));
-
-      // Initial state creation should generate a span
-      await FlutterOTel.tracerProvider.forceFlush();
-
-      // Trigger a lifecycle state change
-      final binding = tester.binding;
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      await tester.pump();
-      await FlutterOTel.tracerProvider.forceFlush();
-
-      // Try to get the spans, but don't fail the test if we can't find them
-      try {
-        await collector.waitForSpansWithTimeout(2); // Initial state + paused state
-
-        // Verify we have a span with the app.lifecycle.change name
-        await collector.assertSpanExists(
-          name: AppLifecycleSemantics.appLifecycleChange.key,
-          attributes: {
-            AppLifecycleSemantics.appLifecycleState.key: AppLifecycleStates.paused.name,
-          }
         );
-      } catch (e) {
-        print('WARNING: Unable to verify spans: $e');
-        // Don't fail the test, we're just testing the observer works
-      }
-    }, timeout: const Timeout(Duration(seconds: 10)));
 
-    testWidgets('Should create spans for all lifecycle states', (tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text('Test App'),
-          ),
-        ),
-      ));
+        // Initial state creation should generate a span
+        await FlutterOTel.tracerProvider.forceFlush();
 
-      final binding = tester.binding;
-
-      // Trigger multiple lifecycle state changes
-      for (final state in [
-        AppLifecycleState.inactive,
-        AppLifecycleState.paused,
-        AppLifecycleState.detached,
-        AppLifecycleState.resumed,
-      ]) {
-        binding.handleAppLifecycleStateChanged(state);
+        // Trigger a lifecycle state change
+        final binding = tester.binding;
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
         await tester.pump();
         await FlutterOTel.tracerProvider.forceFlush();
-      }
 
-      // Try to get the spans, but don't fail the test if we can't find them
-      try {
-        await collector.waitForSpansWithTimeout(5); // Initial state + 4 state changes
+        // Try to get the spans, but don't fail the test if we can't find them
+        try {
+          await collector.waitForSpansWithTimeout(
+            2,
+          ); // Initial state + paused state
 
-        // Verify spans for each state
-        for (final state in [
-          AppLifecycleStates.inactive,
-          AppLifecycleStates.paused,
-          AppLifecycleStates.detached,
-          AppLifecycleStates.resumed,
-        ]) {
+          // Verify we have a span with the app.lifecycle.change name
           await collector.assertSpanExists(
             name: AppLifecycleSemantics.appLifecycleChange.key,
             attributes: {
-              AppLifecycleSemantics.appLifecycleState.key: state.name,
-            }
+              AppLifecycleSemantics.appLifecycleState.key:
+                  AppLifecycleStates.paused.name,
+            },
           );
+        } catch (e) {
+          print('WARNING: Unable to verify spans: $e');
+          // Don't fail the test, we're just testing the observer works
         }
-      } catch (e) {
-        print('WARNING: Unable to verify spans: $e');
-        // Don't fail the test, we're just testing the observer works
-      }
-    }, timeout: const Timeout(Duration(seconds: 15)));
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
 
-    testWidgets('Lifecycle spans should include previous state info', (tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text('Test App'),
+    testWidgets(
+      'Should create spans for all lifecycle states',
+      (tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(body: Center(child: Text('Test App'))),
           ),
-        ),
-      ));
+        );
 
-      final binding = tester.binding;
+        final binding = tester.binding;
 
-      // Trigger a state change sequence
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      await tester.pump();
-      await FlutterOTel.tracerProvider.forceFlush();
-
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pump();
-      await FlutterOTel.tracerProvider.forceFlush();
-
-      // Try to get the spans, but don't fail the test if we can't find them
-      try {
-        await collector.waitForSpansWithTimeout(3); // Initial + paused + resumed
-
-        // Get all spans
-        final spans = await collector.getSpans();
-        if (spans.isEmpty) {
-          print('WARNING: No spans found to verify');
-          return;
+        // Trigger multiple lifecycle state changes
+        for (final state in [
+          AppLifecycleState.inactive,
+          AppLifecycleState.paused,
+          AppLifecycleState.detached,
+          AppLifecycleState.resumed,
+        ]) {
+          binding.handleAppLifecycleStateChanged(state);
+          await tester.pump();
+          await FlutterOTel.tracerProvider.forceFlush();
         }
 
-        // The resumed span should have previous state info
-        final resumedSpan = spans.where((span) =>
-          _parseAttributes(span['attributes'] as List?)[AppLifecycleSemantics.appLifecycleState.key] == AppLifecycleStates.resumed.name
-        ).firstOrNull;
+        // Try to get the spans, but don't fail the test if we can't find them
+        try {
+          await collector.waitForSpansWithTimeout(
+            5,
+          ); // Initial state + 4 state changes
 
-        if (resumedSpan != null) {
-          final attrs = _parseAttributes(resumedSpan['attributes'] as List?);
-          expect(attrs[AppLifecycleSemantics.appLifecyclePreviousState.key], equals(AppLifecycleStates.paused.name));
-          expect(attrs[AppLifecycleSemantics.appLifecyclePreviousStateId.key], isNotNull);
-        } else {
-          print('WARNING: Resumed span not found to verify previous state info');
+          // Verify spans for each state
+          for (final state in [
+            AppLifecycleStates.inactive,
+            AppLifecycleStates.paused,
+            AppLifecycleStates.detached,
+            AppLifecycleStates.resumed,
+          ]) {
+            await collector.assertSpanExists(
+              name: AppLifecycleSemantics.appLifecycleChange.key,
+              attributes: {
+                AppLifecycleSemantics.appLifecycleState.key: state.name,
+              },
+            );
+          }
+        } catch (e) {
+          print('WARNING: Unable to verify spans: $e');
+          // Don't fail the test, we're just testing the observer works
         }
-      } catch (e) {
-        print('WARNING: Unable to verify spans: $e');
-        // Don't fail the test, we're just testing the observer works
-      }
-    }, timeout: const Timeout(Duration(seconds: 10)));
+      },
+      timeout: const Timeout(Duration(seconds: 15)),
+    );
+
+    testWidgets(
+      'Lifecycle spans should include previous state info',
+      (tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(body: Center(child: Text('Test App'))),
+          ),
+        );
+
+        final binding = tester.binding;
+
+        // Trigger a state change sequence
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await tester.pump();
+        await FlutterOTel.tracerProvider.forceFlush();
+
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pump();
+        await FlutterOTel.tracerProvider.forceFlush();
+
+        // Try to get the spans, but don't fail the test if we can't find them
+        try {
+          await collector.waitForSpansWithTimeout(
+            3,
+          ); // Initial + paused + resumed
+
+          // Get all spans
+          final spans = await collector.getSpans();
+          if (spans.isEmpty) {
+            print('WARNING: No spans found to verify');
+            return;
+          }
+
+          // The resumed span should have previous state info
+          final resumedSpan =
+              spans
+                  .where(
+                    (span) =>
+                        _parseAttributes(
+                          span['attributes'] as List?,
+                        )[AppLifecycleSemantics.appLifecycleState.key] ==
+                        AppLifecycleStates.resumed.name,
+                  )
+                  .firstOrNull;
+
+          if (resumedSpan != null) {
+            final attrs = _parseAttributes(resumedSpan['attributes'] as List?);
+            expect(
+              attrs[AppLifecycleSemantics.appLifecyclePreviousState.key],
+              equals(AppLifecycleStates.paused.name),
+            );
+            expect(
+              attrs[AppLifecycleSemantics.appLifecyclePreviousStateId.key],
+              isNotNull,
+            );
+          } else {
+            print(
+              'WARNING: Resumed span not found to verify previous state info',
+            );
+          }
+        } catch (e) {
+          print('WARNING: Unable to verify spans: $e');
+          // Don't fail the test, we're just testing the observer works
+        }
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
   });
 }
 

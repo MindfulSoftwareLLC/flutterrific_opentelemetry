@@ -16,7 +16,7 @@ class MockUITracer extends Mock implements UITracer {
   final List<UISpan> _createdSpans = [];
 
   MockUITracer({required sdk.TracerProvider tracerProvider})
-      : _tracerProvider = tracerProvider;
+    : _tracerProvider = tracerProvider;
 
   @override
   UISpan startSpan(

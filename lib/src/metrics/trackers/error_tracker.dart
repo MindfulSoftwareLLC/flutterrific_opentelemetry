@@ -128,9 +128,10 @@ class ErrorTracker {
     // Calculate error rate per minute
     final now = DateTime.now();
     final oneMinuteAgo = now.subtract(const Duration(minutes: 1));
-    final recentErrors = timestamps.where(
-      (ts) => ts > oneMinuteAgo.millisecondsSinceEpoch
-    ).length;
+    final recentErrors =
+        timestamps
+            .where((ts) => ts > oneMinuteAgo.millisecondsSinceEpoch)
+            .length;
 
     // Alert if error rate exceeds threshold (e.g., more than 5 errors per minute)
     if (recentErrors >= 5) {
@@ -146,9 +147,8 @@ class ErrorTracker {
   }
 
   ErrorSummary getErrorSummary(String errorType) {
-    final errors = _errorHistory.where(
-      (e) => _categorizeError(e) == errorType
-    ).toList();
+    final errors =
+        _errorHistory.where((e) => _categorizeError(e) == errorType).toList();
 
     if (errors.isEmpty) {
       throw ArgumentError('No errors found for type: $errorType');

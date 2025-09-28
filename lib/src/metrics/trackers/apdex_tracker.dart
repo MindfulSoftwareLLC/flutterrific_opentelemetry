@@ -4,7 +4,8 @@
 import 'dart:async';
 import '../flutter_metric_reporter.dart';
 
-typedef ApdexScoreListener = void Function(String component, double score, Duration period);
+typedef ApdexScoreListener =
+    void Function(String component, double score, Duration period);
 
 class ApdexResult {
   final String componentName;
@@ -56,12 +57,16 @@ class ApdexTracker {
 
     _interactionSubscription = _reporter.interactionStream.listen((metric) {
       if (metric.responseTime != null) {
-        _processResponseTime('${metric.screenName}.${metric.actionType}', metric.responseTime!);
+        _processResponseTime(
+          '${metric.screenName}.${metric.actionType}',
+          metric.responseTime!,
+        );
       }
     });
   }
 
-  void setThresholds(String component, {
+  void setThresholds(
+    String component, {
     Duration? targetDuration,
     Duration? toleratingDuration,
   }) {
@@ -104,8 +109,10 @@ class ApdexTracker {
     final responseTimes = _responseTimeHistory[component];
     if (responseTimes == null || responseTimes.isEmpty) return null;
 
-    final targetThreshold = _targetThresholds[component] ?? defaultTargetDuration;
-    final toleratingThreshold = _toleratingThresholds[component] ?? defaultToleratingDuration;
+    final targetThreshold =
+        _targetThresholds[component] ?? defaultTargetDuration;
+    final toleratingThreshold =
+        _toleratingThresholds[component] ?? defaultToleratingDuration;
 
     // Filter responses within the specified period
     final now = DateTime.now();

@@ -45,7 +45,10 @@ class PaintTracker {
     });
   }
 
-  String _determineContentfulPaintType(String componentName, Duration duration) {
+  String _determineContentfulPaintType(
+    String componentName,
+    Duration duration,
+  ) {
     if (!_firstPaintTimes.containsKey(componentName)) {
       _firstPaintTimes[componentName] = DateTime.now();
       return 'first_paint';
@@ -68,9 +71,11 @@ class PaintTracker {
     if (!_componentPaintHistory.containsKey(metric.componentName)) {
       _componentPaintHistory[metric.componentName] = {};
     }
-    _componentPaintHistory[metric.componentName]![metric.paintType] = metric.paintDuration;
+    _componentPaintHistory[metric.componentName]![metric.paintType] =
+        metric.paintDuration;
 
-    if (metric.paintType == 'first_paint' || metric.paintType == 'first_contentful_paint') {
+    if (metric.paintType == 'first_paint' ||
+        metric.paintType == 'first_contentful_paint') {
       _firstPaintTimes[metric.componentName] = metric.timestamp;
     }
   }
@@ -86,7 +91,8 @@ class PaintTracker {
   Map<String, Duration> getFirstPaintTimes() {
     Map<String, Duration> times = {};
     _firstPaintTimes.forEach((component, timestamp) {
-      times[component] = _componentPaintHistory[component]?['first_paint'] ?? Duration.zero;
+      times[component] =
+          _componentPaintHistory[component]?['first_paint'] ?? Duration.zero;
     });
     return times;
   }

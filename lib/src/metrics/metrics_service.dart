@@ -11,7 +11,6 @@ import 'trackers/error_tracker.dart';
 import 'listeners/console_metrics_listener.dart';
 
 class MetricsService {
-
   static void dispose() {
     if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric('MetricsService: Disposing and flushing metrics');

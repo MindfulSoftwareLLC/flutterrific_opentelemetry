@@ -15,7 +15,7 @@ void main() {
     // You can use OTel to create other tracers for different
     // parts of the app, for repositories or services, etc.
     // or use one tracer for the whole app.
-    tracerName: '$appName-ui'
+    tracerName: '$appName-ui',
   );
   runApp(const MyApp());
 }
@@ -72,10 +72,11 @@ class _MyHomePageState extends State<MyHomePage> {
     final span = tracer.startSpan(
       'fetch_data',
       kind: SpanKind.client,
-      attributes: <String, Object>{
-        'operation.type': 'network_request',
-        'endpoint': '/api/data',
-      }.toAttributes(),
+      attributes:
+          <String, Object>{
+            'operation.type': 'network_request',
+            'endpoint': '/api/data',
+          }.toAttributes(),
     );
 
     try {
@@ -83,10 +84,10 @@ class _MyHomePageState extends State<MyHomePage> {
       await Future.delayed(const Duration(seconds: 2));
 
       // Add event to the span
-      span.addEventNow('data_received', {
-        'bytes_received': 1024,
-        'response_code': 200,
-      }.toAttributes());
+      span.addEventNow(
+        'data_received',
+        {'bytes_received': 1024, 'response_code': 200}.toAttributes(),
+      );
 
       // End span successfully
       span.end();
@@ -114,9 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
+            const Text('You have pushed the button this many times:'),
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
@@ -125,9 +124,10 @@ class _MyHomePageState extends State<MyHomePage> {
             // Using widget extension to track user interaction
             ElevatedButton(
               onPressed: _isLoading ? null : _simulateNetworkRequest,
-              child: _isLoading
-                ? const CircularProgressIndicator()
-                : const Text('Simulate Network Request'),
+              child:
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : const Text('Simulate Network Request'),
             ).withOTelButtonTracking('network_request_button'),
             const SizedBox(height: 20),
             // Using widget extension to track text input

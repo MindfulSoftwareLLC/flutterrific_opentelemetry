@@ -4,7 +4,8 @@
 import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutterrific_opentelemetry/src/trace/ui_span.dart';
-import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart' as api;
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart'
+    as api;
 import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart' as sdk;
 
 import '../flutterrific_otel.dart';
@@ -110,16 +111,17 @@ class UITracer implements sdk.Tracer {
     }
 
     return _delegate.createSpan(
-      name: name,
-      spanContext: spanContext,
-      parentSpan: parentSpan,
-      kind: kind,
-      attributes: attributes,
-      links: links,
-      startTime: startTime,
-      spanEvents: spanEvents,
-      isRecording: isRecording,
-    ) as UISpan;
+          name: name,
+          spanContext: spanContext,
+          parentSpan: parentSpan,
+          kind: kind,
+          attributes: attributes,
+          links: links,
+          startTime: startTime,
+          spanEvents: spanEvents,
+          isRecording: isRecording,
+        )
+        as UISpan;
   }
 
   @override
@@ -221,7 +223,8 @@ class UITracer implements sdk.Tracer {
           previousRoutePath;
     }
     if (previousRouteId != null) {
-      attrMap[api.NavigationSemantics.previousRouteId.key] = previousRouteId.hexString;
+      attrMap[api.NavigationSemantics.previousRouteId.key] =
+          previousRouteId.hexString;
     }
     if (routeDuration != null) {
       attrMap[api.NavigationSemantics.previousRouteDuration.key] =
@@ -376,28 +379,78 @@ class UITracer implements sdk.Tracer {
   api.APISpan? get currentSpan => _delegate.currentSpan;
 
   @override
-  T recordSpan<T>({required String name, required T Function() fn, SpanKind kind = SpanKind.internal, Attributes? attributes}) {
-    return _delegate.recordSpan(name: name, fn: fn, kind: kind, attributes: attributes);
+  T recordSpan<T>({
+    required String name,
+    required T Function() fn,
+    SpanKind kind = SpanKind.internal,
+    Attributes? attributes,
+  }) {
+    return _delegate.recordSpan(
+      name: name,
+      fn: fn,
+      kind: kind,
+      attributes: attributes,
+    );
   }
 
   @override
-  Future<T> recordSpanAsync<T>({required String name, required Future<T> Function() fn, SpanKind kind = SpanKind.internal, Attributes? attributes}) {
-    return _delegate.recordSpanAsync(name: name, fn: fn, kind: kind, attributes: attributes);
+  Future<T> recordSpanAsync<T>({
+    required String name,
+    required Future<T> Function() fn,
+    SpanKind kind = SpanKind.internal,
+    Attributes? attributes,
+  }) {
+    return _delegate.recordSpanAsync(
+      name: name,
+      fn: fn,
+      kind: kind,
+      attributes: attributes,
+    );
   }
 
   @override
-  T startActiveSpan<T>({required String name, required T Function(api.APISpan span) fn, SpanKind kind = SpanKind.internal, Attributes? attributes}) {
-    return _delegate.startActiveSpan(name: name, fn: fn, kind: kind, attributes: attributes);
+  T startActiveSpan<T>({
+    required String name,
+    required T Function(api.APISpan span) fn,
+    SpanKind kind = SpanKind.internal,
+    Attributes? attributes,
+  }) {
+    return _delegate.startActiveSpan(
+      name: name,
+      fn: fn,
+      kind: kind,
+      attributes: attributes,
+    );
   }
 
   @override
-  Future<T> startActiveSpanAsync<T>({required String name, required Future<T> Function(api.APISpan span) fn, SpanKind kind = SpanKind.internal, Attributes? attributes}) {
-    return _delegate.startActiveSpanAsync(name: name, fn: fn, kind: kind, attributes: attributes);
+  Future<T> startActiveSpanAsync<T>({
+    required String name,
+    required Future<T> Function(api.APISpan span) fn,
+    SpanKind kind = SpanKind.internal,
+    Attributes? attributes,
+  }) {
+    return _delegate.startActiveSpanAsync(
+      name: name,
+      fn: fn,
+      kind: kind,
+      attributes: attributes,
+    );
   }
 
   @override
-  api.APISpan startSpanWithContext({required String name, required Context context, SpanKind kind = SpanKind.internal, Attributes? attributes}) {
-    return _delegate.startSpanWithContext(name: name, context: context, kind: kind, attributes: attributes);
+  api.APISpan startSpanWithContext({
+    required String name,
+    required Context context,
+    SpanKind kind = SpanKind.internal,
+    Attributes? attributes,
+  }) {
+    return _delegate.startSpanWithContext(
+      name: name,
+      context: context,
+      kind: kind,
+      attributes: attributes,
+    );
   }
 
   @override

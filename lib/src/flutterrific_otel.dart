@@ -16,7 +16,6 @@ import 'package:flutterrific_opentelemetry/src/nav/otel_navigator_observer.dart'
 import 'package:flutterrific_opentelemetry/src/trace/interaction_tracker.dart';
 import 'package:flutterrific_opentelemetry/src/trace/ui_tracer.dart';
 import 'package:flutterrific_opentelemetry/src/trace/ui_tracer_provider.dart';
-import 'package:flutterrific_opentelemetry/src/util/platform_detection.dart';
 import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 import 'package:uuid/uuid.dart';
 
@@ -217,26 +216,32 @@ class FlutterOTel {
     _appName = appName ?? serviceName;
     FlutterOTel.commonAttributesFunction = commonAttributesFunction;
     if (endpoint == null) {
-      if (dartasticApiKey != null && dartasticApiKey.isNotEmpty) {
+      // OTel environment variables come first
+      final envEndpoint = const String.fromEnvironment(
+        'OTEL_EXPORTER_OTLP_ENDPOINT',
+      );
+      if (envEndpoint.isNotEmpty) {
+        endpoint = envEndpoint;
+        if (OTelLog.isDebug())
+          OTelLog.debug(
+            'Using endpoint from OTEL_EXPORTER_OTLP_ENDPOINT: $endpoint',
+          );
+      } else if (dartasticApiKey != null && dartasticApiKey.isNotEmpty) {
+        // dartastic key uses the dartastic endpoint
         endpoint = dartasticEndpoint;
+        if (OTelLog.isDebug())
+          OTelLog.debug('Using default Dartastic endpoint : $endpoint');
       } else {
         endpoint = OTelFactory.defaultEndpoint;
+        if (OTelLog.isDebug())
+          OTelLog.debug(
+            'Using endpoint from OTelFactory.defaultEndpoint: $endpoint',
+          );
       }
     }
-    
-    // Check for environment variables
-    final envEndpoint = const String.fromEnvironment('OTEL_EXPORTER_OTLP_ENDPOINT');
-    if (envEndpoint.isNotEmpty) {
-      endpoint = envEndpoint;
-      if (OTelLog.isDebug()) OTelLog.debug('Using endpoint from OTEL_EXPORTER_OTLP_ENDPOINT: $endpoint');
-    }
-    
-    // For Flutter web or when explicitly configured to use HTTP/protobuf, adjust the endpoint
-    final envProtocol = const String.fromEnvironment('OTEL_EXPORTER_OTLP_PROTOCOL');
-    if (kIsWeb || (envProtocol.isNotEmpty && envProtocol.toLowerCase() == 'http/protobuf')) {
-      endpoint = PlatformDetection.adjustEndpoint(endpoint, insecure: !secure);
-      if (OTelLog.isDebug()) OTelLog.debug('Adjusted endpoint for web or HTTP protocol: $endpoint');
-    }
+
+    if (OTelLog.isDebug()) OTelLog.debug('Using endpoint: $endpoint');
+
     resourceAttributes ??= sdk.OTel.attributes();
     appLaunchId = Uuid().v4();
     resourceAttributes = resourceAttributes.copyWithAttributes(
@@ -244,24 +249,67 @@ class FlutterOTel {
         AppLifecycleSemantics.appLaunchId.key: appLaunchId!,
       }.toAttributes(),
     );
+
+    // Create platform-specific exporters if not provided
     if (spanProcessor == null) {
-      // Create the appropriate span exporter based on platform
-      final exporter = PlatformDetection.createSpanExporter(
-        endpoint: endpoint,
-        insecure: !secure,
+      sdk.SpanExporter exporter;
+      if (kIsWeb) {
+        // Web platform must use HTTP
+        if (OTelLog.isDebug())
+          OTelLog.debug('Creating HTTP span exporter for web platform');
+        exporter = OtlpHttpSpanExporter(
+          OtlpHttpExporterConfig(
+            endpoint: endpoint,
+            compression: false, // Web doesn't handle compression well
+          ),
+        );
+      } else {
+        // Native platforms use gRPC
+        if (OTelLog.isDebug())
+          OTelLog.debug('Creating gRPC span exporter for native platform');
+        exporter = OtlpGrpcSpanExporter(
+          OtlpGrpcExporterConfig(endpoint: endpoint, insecure: !secure),
+        );
+      }
+      spanProcessor = sdk.BatchSpanProcessor(
+        exporter,
+        const BatchSpanProcessorConfig(
+          maxQueueSize: 2048,
+          scheduleDelay: Duration(seconds: 1),
+          maxExportBatchSize: 512,
+        ),
       );
-      
-      spanProcessor = sdk.SimpleSpanProcessor(exporter);
+      if (OTelLog.isDebug())
+        OTelLog.debug('Created ${kIsWeb ? "HTTP" : "gRPC"} span processor');
     }
-    
-    metricExporter ??= PlatformDetection.createMetricExporter(
-        endpoint: endpoint,
-        insecure: !secure,
-      );
+
+    // Create platform-specific metric exporters if not provided
+    if (metricExporter == null) {
+      if (kIsWeb) {
+        // Web platform must use HTTP
+        if (OTelLog.isDebug())
+          OTelLog.debug('Creating HTTP metric exporter for web platform');
+        metricExporter = OtlpHttpMetricExporter(
+          OtlpHttpMetricExporterConfig(
+            endpoint: endpoint,
+            compression: false, // Web doesn't handle compression well
+          ),
+        );
+      } else {
+        // Native platforms use gRPC
+        if (OTelLog.isDebug())
+          OTelLog.debug('Creating gRPC metric exporter for native platform');
+        metricExporter = OtlpGrpcMetricExporter(
+          OtlpGrpcMetricExporterConfig(endpoint: endpoint, insecure: !secure),
+        );
+      }
+    }
+
     metricReader ??= PeriodicExportingMetricReader(
-        metricExporter,
-        interval: Duration(seconds: 1), // Export every second
-      );
+      metricExporter,
+      interval: Duration(seconds: 1), // Export every second
+    );
+
     await sdk.OTel.initialize(
       endpoint: endpoint,
       secure: secure,
@@ -324,10 +372,11 @@ class FlutterOTel {
     String? schemaUrl,
   }) {
     return meterProvider.getMeter(
-      name: name,
-      version: version,
-      schemaUrl: schemaUrl,
-    ) as UIMeter;
+          name: name,
+          version: version,
+          schemaUrl: schemaUrl,
+        )
+        as UIMeter;
   }
 
   /// Starts a span for a screen/route
@@ -412,23 +461,27 @@ class FlutterOTel {
       span.end(endTime: span.startTime.add(responseTime));
 
       // Also record as a metrics histogram
-      meter(name: 'flutter.interaction').createHistogram(
-        name: 'interaction.response_time',
-        description: 'User interaction response time',
-        unit: 'ms',
-      ).record(
-        responseTime.inMilliseconds,
-        interactionAttributes.toAttributes(),
-      );
+      meter(name: 'flutter.interaction')
+          .createHistogram(
+            name: 'interaction.response_time',
+            description: 'User interaction response time',
+            unit: 'ms',
+          )
+          .record(
+            responseTime.inMilliseconds,
+            interactionAttributes.toAttributes(),
+          );
     } else {
       span.end();
 
       // Record as a simple counter
-      meter(name: 'flutter.interaction').createCounter(
-        name: 'interaction.count',
-        description: 'User interaction count',
-        unit: '{interactions}',
-      ).add(1, interactionAttributes.toAttributes());
+      meter(name: 'flutter.interaction')
+          .createCounter(
+            name: 'interaction.count',
+            description: 'User interaction count',
+            unit: '{interactions}',
+          )
+          .add(1, interactionAttributes.toAttributes());
     }
   }
 
@@ -459,14 +512,13 @@ class FlutterOTel {
     span.end(endTime: span.startTime.add(duration));
 
     // Also record as metric
-    meter(name: 'flutter.navigation').createHistogram(
-      name: 'navigation.duration',
-      description: 'Navigation transition time',
-      unit: 'ms',
-    ).record(
-      duration.inMilliseconds,
-      navAttributes.toAttributes(),
-    );
+    meter(name: 'flutter.navigation')
+        .createHistogram(
+          name: 'navigation.duration',
+          description: 'Navigation transition time',
+          unit: 'ms',
+        )
+        .record(duration.inMilliseconds, navAttributes.toAttributes());
   }
 
   /// Records an error within the current context
@@ -505,12 +557,14 @@ class FlutterOTel {
       span.end();
 
       // Also record as a metric counter
-      meter(name: 'flutter.errors').createCounter(
-        name: 'error.count',
-        description: 'Error counter',
-        unit: '{errors}',
-      ).add(1, errorAttributes.toAttributes());
-    } catch (e,s) {
+      meter(name: 'flutter.errors')
+          .createCounter(
+            name: 'error.count',
+            description: 'Error counter',
+            unit: '{errors}',
+          )
+          .add(1, errorAttributes.toAttributes());
+    } catch (e, s) {
       // TODO - best alternative?
       OTelLog.error('Error when reporting the Flutter error: $e \n$s');
     }
@@ -539,17 +593,19 @@ class FlutterOTel {
     span.end(endTime: span.startTime.add(duration));
 
     // Also record as a metric for proper aggregation
-    meter(name: 'flutter.performance').createHistogram(
-      name: 'perf.$name',
-      description: 'Performance measurement for $name',
-      unit: 'ms',
-    ).record(
-      duration.inMilliseconds,
-      <String, Object>{
-        'perf.metric.name': name,
-        ...?attributes,
-      }.toAttributes(),
-    );
+    meter(name: 'flutter.performance')
+        .createHistogram(
+          name: 'perf.$name',
+          description: 'Performance measurement for $name',
+          unit: 'ms',
+        )
+        .record(
+          duration.inMilliseconds,
+          <String, Object>{
+            'perf.metric.name': name,
+            ...?attributes,
+          }.toAttributes(),
+        );
   }
 
   /// Clean up resources
@@ -575,7 +631,6 @@ class FlutterOTel {
       // Ignore errors when observer isn't registered
     }
   }
-
 }
 
 /// Extension methods for Flutter widgets to simplify OpenTelemetry integration

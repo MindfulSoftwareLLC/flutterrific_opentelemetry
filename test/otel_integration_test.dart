@@ -47,10 +47,11 @@ class HomePage extends StatelessWidget {
                 // Create a custom span for demonstration
                 final span = FlutterOTel.tracer.startSpan(
                   'custom_interaction',
-                  attributes: {
-                    'interaction.type': 'button_click',
-                    'interaction.target': 'custom_action_button',
-                  }.toAttributes(),
+                  attributes:
+                      {
+                        'interaction.type': 'button_click',
+                        'interaction.target': 'custom_action_button',
+                      }.toAttributes(),
                 );
 
                 // End the span after action completes
@@ -245,138 +246,183 @@ void main() {
       await FlutterOTel.reset();
     });
 
-    testWidgets('Should track both app lifecycle and navigation events', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'Should track both app lifecycle and navigation events',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
 
-      // Verify home page is showing
-      expect(find.byKey(const Key('home_page')), findsOneWidget);
+        // Verify home page is showing
+        expect(find.byKey(const Key('home_page')), findsOneWidget);
 
-      // Initial route should be tracked
-      expect(FlutterOTel.routeObserver.currentRouteData?.routeSpanId, isNotNull);
-      expect(FlutterOTel.routeObserver.currentRouteData, isNotNull);
+        // Initial route should be tracked
+        expect(
+          FlutterOTel.routeObserver.currentRouteData?.routeSpanId,
+          isNotNull,
+        );
+        expect(FlutterOTel.routeObserver.currentRouteData, isNotNull);
 
-      // Navigate to profile page using direct router navigation
-      router.go('/profile');
-      await tester.pumpAndSettle();
+        // Navigate to profile page using direct router navigation
+        router.go('/profile');
+        await tester.pumpAndSettle();
 
-      // Verify profile page is showing
-      expect(find.byKey(const Key('profile_page')), findsOneWidget);
+        // Verify profile page is showing
+        expect(find.byKey(const Key('profile_page')), findsOneWidget);
 
-      // Verify navigation was tracked
-      expect(FlutterOTel.routeObserver.currentRouteData?.routeName, contains('profile'));
+        // Verify navigation was tracked
+        expect(
+          FlutterOTel.routeObserver.currentRouteData?.routeName,
+          contains('profile'),
+        );
 
-      // Simulate app lifecycle change
-      final binding = tester.binding;
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-      await tester.pump();
+        // Simulate app lifecycle change
+        final binding = tester.binding;
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        await tester.pump();
 
-      // Verify lifecycle was tracked
-      expect(FlutterOTel.lifecycleObserver.currentAppLifecycleState?.name, equals(AppLifecycleState.inactive.name));
+        // Verify lifecycle was tracked
+        expect(
+          FlutterOTel.lifecycleObserver.currentAppLifecycleState?.name,
+          equals(AppLifecycleState.inactive.name),
+        );
 
-      // Return to active state
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pump();
+        // Return to active state
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pump();
 
-      // Navigate to subroute (edit profile)
-      router.go('/profile/edit');
-      await tester.pumpAndSettle();
+        // Navigate to subroute (edit profile)
+        router.go('/profile/edit');
+        await tester.pumpAndSettle();
 
-      // Verify edit profile page is showing
-      expect(find.byKey(const Key('edit_profile_page')), findsOneWidget);
+        // Verify edit profile page is showing
+        expect(find.byKey(const Key('edit_profile_page')), findsOneWidget);
 
-      // Verify subroute was tracked
-      expect(FlutterOTel.routeObserver.currentRouteData?.routePath, contains('/profile/edit'));
+        // Verify subroute was tracked
+        expect(
+          FlutterOTel.routeObserver.currentRouteData?.routePath,
+          contains('/profile/edit'),
+        );
 
-      // Navigate back to profile
-      router.go('/profile');
-      await tester.pumpAndSettle();
+        // Navigate back to profile
+        router.go('/profile');
+        await tester.pumpAndSettle();
 
-      // Navigate back to home
-      router.go('/');
-      await tester.pumpAndSettle();
+        // Navigate back to home
+        router.go('/');
+        await tester.pumpAndSettle();
 
-      // Verify home page is showing again
-      expect(find.byKey(const Key('home_page')), findsOneWidget);
+        // Verify home page is showing again
+        expect(find.byKey(const Key('home_page')), findsOneWidget);
 
-      // Verify return navigation was tracked
-      expect(FlutterOTel.routeObserver.currentRouteData?.routePath, equals('/'));
+        // Verify return navigation was tracked
+        expect(
+          FlutterOTel.routeObserver.currentRouteData?.routePath,
+          equals('/'),
+        );
 
-      // Test custom span creation
-      await tester.tap(find.byKey(const Key('custom_action_button')));
-      await tester.pump();
+        // Test custom span creation
+        await tester.tap(find.byKey(const Key('custom_action_button')));
+        await tester.pump();
 
-      // No explicit verification for the custom span as it's internal to OTel
-      // We're just ensuring it doesn't throw exceptions
-    }, timeout: const Timeout(Duration(seconds: 10)));
+        // No explicit verification for the custom span as it's internal to OTel
+        // We're just ensuring it doesn't throw exceptions
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
 
-    testWidgets('Should track app background and foreground transitions', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'Should track app background and foreground transitions',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
 
-      final binding = tester.binding;
+        final binding = tester.binding;
 
-      // App goes to background
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      await tester.pump();
-      expect(FlutterOTel.lifecycleObserver.currentAppLifecycleState?.name, equals(AppLifecycleState.paused.name));
+        // App goes to background
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await tester.pump();
+        expect(
+          FlutterOTel.lifecycleObserver.currentAppLifecycleState?.name,
+          equals(AppLifecycleState.paused.name),
+        );
 
-      // App returns from background
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pump();
-      expect(FlutterOTel.lifecycleObserver.currentAppLifecycleState?.name, equals(AppLifecycleState.resumed.name));
-    }, timeout: const Timeout(Duration(seconds: 10)));
+        // App returns from background
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pump();
+        expect(
+          FlutterOTel.lifecycleObserver.currentAppLifecycleState?.name,
+          equals(AppLifecycleState.resumed.name),
+        );
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
 
-    testWidgets('Should navigate between multiple subroutes', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'Should navigate between multiple subroutes',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
 
-      // Go to Settings
-      router.go('/settings');
-      await tester.pumpAndSettle();
+        // Go to Settings
+        router.go('/settings');
+        await tester.pumpAndSettle();
 
-      // Verify settings page is showing
-      expect(find.byKey(const Key('settings_page')), findsOneWidget);
-      expect(FlutterOTel.routeObserver.currentRouteData?.routePath, contains('/settings'));
+        // Verify settings page is showing
+        expect(find.byKey(const Key('settings_page')), findsOneWidget);
+        expect(
+          FlutterOTel.routeObserver.currentRouteData?.routePath,
+          contains('/settings'),
+        );
 
-      // Go to Notifications (subroute)
-      router.go('/settings/notifications');
-      await tester.pumpAndSettle();
+        // Go to Notifications (subroute)
+        router.go('/settings/notifications');
+        await tester.pumpAndSettle();
 
-      // Verify notifications page is showing
-      expect(find.byKey(const Key('notification_settings_page')), findsOneWidget);
-      expect(FlutterOTel.routeObserver.currentRouteData?.routePath, contains('/settings/notifications'));
+        // Verify notifications page is showing
+        expect(
+          find.byKey(const Key('notification_settings_page')),
+          findsOneWidget,
+        );
+        expect(
+          FlutterOTel.routeObserver.currentRouteData?.routePath,
+          contains('/settings/notifications'),
+        );
 
-      // Back to Settings
-      router.go('/settings');
-      await tester.pumpAndSettle();
+        // Back to Settings
+        router.go('/settings');
+        await tester.pumpAndSettle();
 
-      // Verify settings page is showing again
-      expect(find.byKey(const Key('settings_page')), findsOneWidget);
-      expect(FlutterOTel.routeObserver.currentRouteData?.routePath, equals('/settings'));
+        // Verify settings page is showing again
+        expect(find.byKey(const Key('settings_page')), findsOneWidget);
+        expect(
+          FlutterOTel.routeObserver.currentRouteData?.routePath,
+          equals('/settings'),
+        );
 
-      // Go to Home
-      router.go('/');
-      await tester.pumpAndSettle();
+        // Go to Home
+        router.go('/');
+        await tester.pumpAndSettle();
 
-      // Verify home page is showing again
-      expect(find.byKey(const Key('home_page')), findsOneWidget);
-      expect(FlutterOTel.routeObserver.currentRouteData?.routePath, equals('/'));
+        // Verify home page is showing again
+        expect(find.byKey(const Key('home_page')), findsOneWidget);
+        expect(
+          FlutterOTel.routeObserver.currentRouteData?.routePath,
+          equals('/'),
+        );
 
-      // Now try a different path
-      router.go('/profile');
-      await tester.pumpAndSettle();
+        // Now try a different path
+        router.go('/profile');
+        await tester.pumpAndSettle();
 
-      // Verify profile page is showing
-      expect(find.byKey(const Key('profile_page')), findsOneWidget);
-      expect(FlutterOTel.routeObserver.currentRouteData?.routePath, contains('/profile'));
-    }, timeout: const Timeout(Duration(seconds: 10)));
+        // Verify profile page is showing
+        expect(find.byKey(const Key('profile_page')), findsOneWidget);
+        expect(
+          FlutterOTel.routeObserver.currentRouteData?.routePath,
+          contains('/profile'),
+        );
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
   });
 
   group('FlutterOTel Integration with Real Collector', () {
@@ -469,115 +515,117 @@ void main() {
       await FlutterOTel.reset();
     });
 
-    testWidgets('Should create both lifecycle and navigation spans', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
-      await FlutterOTel.tracerProvider.forceFlush();
+    testWidgets(
+      'Should create both lifecycle and navigation spans',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
+        await FlutterOTel.tracerProvider.forceFlush();
 
-      // Navigate to profile page
-      router.go('/profile');
-      await tester.pumpAndSettle();
+        // Navigate to profile page
+        router.go('/profile');
+        await tester.pumpAndSettle();
 
-      // Trigger a lifecycle state change
-      final binding = tester.binding;
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      await tester.pump();
+        // Trigger a lifecycle state change
+        final binding = tester.binding;
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await tester.pump();
 
-      // Force flush to ensure spans are exported
-      await FlutterOTel.tracerProvider.forceFlush();
+        // Force flush to ensure spans are exported
+        await FlutterOTel.tracerProvider.forceFlush();
 
-      // Try to verify spans, but don't fail if they can't be verified
-      try {
-        // Wait for spans to be exported with a shorter timeout
-        await collector.waitForSpansWithTimeout(3); // Initial route + profile page + lifecycle change
+        // Try to verify spans, but don't fail if they can't be verified
+        try {
+          // Wait for spans to be exported with a shorter timeout
+          await collector.waitForSpansWithTimeout(
+            3,
+          ); // Initial route + profile page + lifecycle change
 
-        // Verify a navigation span and a lifecycle span were created
-        await collector.assertSpanExists(
-          name: NavigationSemantics.navigationAction.key
-        );
+          // Verify a navigation span and a lifecycle span were created
+          await collector.assertSpanExists(
+            name: NavigationSemantics.navigationAction.key,
+          );
 
-        await collector.assertSpanExists(
-          name: AppLifecycleSemantics.appLifecycleChange.key
-        );
-      } catch (e) {
-        print('WARNING: Unable to verify spans: $e');
-        // Don't fail the test, we're just testing the observers work
-      }
-    }, timeout: const Timeout(Duration(seconds: 10)));
+          await collector.assertSpanExists(
+            name: AppLifecycleSemantics.appLifecycleChange.key,
+          );
+        } catch (e) {
+          print('WARNING: Unable to verify spans: $e');
+          // Don't fail the test, we're just testing the observers work
+        }
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
 
-    testWidgets('Should create spans for complex navigation sequence with subroutes', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'Should create spans for complex navigation sequence with subroutes',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
 
-      // Execute a complex navigation sequence with subroutes
+        // Execute a complex navigation sequence with subroutes
 
-      // Navigate to profile page
-      router.go('/profile');
-      await tester.pumpAndSettle();
+        // Navigate to profile page
+        router.go('/profile');
+        await tester.pumpAndSettle();
 
-      // Navigate to edit profile subroute
-      router.go('/profile/edit');
-      await tester.pumpAndSettle();
+        // Navigate to edit profile subroute
+        router.go('/profile/edit');
+        await tester.pumpAndSettle();
 
-      // Back to profile
-      router.go('/profile');
-      await tester.pumpAndSettle();
+        // Back to profile
+        router.go('/profile');
+        await tester.pumpAndSettle();
 
-      // Go to home
-      router.go('/');
-      await tester.pumpAndSettle();
+        // Go to home
+        router.go('/');
+        await tester.pumpAndSettle();
 
-      // Go to settings
-      router.go('/settings');
-      await tester.pumpAndSettle();
+        // Go to settings
+        router.go('/settings');
+        await tester.pumpAndSettle();
 
-      // Go to notifications subroute
-      router.go('/settings/notifications');
-      await tester.pumpAndSettle();
+        // Go to notifications subroute
+        router.go('/settings/notifications');
+        await tester.pumpAndSettle();
 
-      // Force flush to ensure spans are exported
-      await FlutterOTel.tracerProvider.forceFlush();
+        // Force flush to ensure spans are exported
+        await FlutterOTel.tracerProvider.forceFlush();
 
-      // Try to verify spans, but don't fail if they can't be verified
-      try {
-        // Wait for spans to be exported with a shorter timeout
-        await collector.waitForSpansWithTimeout(7); // Initial + 6 navigation steps
+        // Try to verify spans, but don't fail if they can't be verified
+        try {
+          // Wait for spans to be exported with a shorter timeout
+          await collector.waitForSpansWithTimeout(
+            7,
+          ); // Initial + 6 navigation steps
 
-        // Verify spans for each step of the navigation path
-        await collector.assertSpanExists(
-          name: NavigationSemantics.navigationAction.key,
-          attributes: {
-            NavigationSemantics.routePath.key: '/profile',
-          }
-        );
+          // Verify spans for each step of the navigation path
+          await collector.assertSpanExists(
+            name: NavigationSemantics.navigationAction.key,
+            attributes: {NavigationSemantics.routePath.key: '/profile'},
+          );
 
-        await collector.assertSpanExists(
-          name: NavigationSemantics.navigationAction.key,
-          attributes: {
-            NavigationSemantics.routePath.key: '/profile/edit',
-          }
-        );
+          await collector.assertSpanExists(
+            name: NavigationSemantics.navigationAction.key,
+            attributes: {NavigationSemantics.routePath.key: '/profile/edit'},
+          );
 
-        await collector.assertSpanExists(
-          name: NavigationSemantics.navigationAction.key,
-          attributes: {
-            NavigationSemantics.routePath.key: '/settings/notifications',
-          }
-        );
-      } catch (e) {
-        print('WARNING: Unable to verify spans: $e');
-        // Don't fail the test, we're just testing the observers work
-      }
-    }, timeout: const Timeout(Duration(seconds: 15)));
+          await collector.assertSpanExists(
+            name: NavigationSemantics.navigationAction.key,
+            attributes: {
+              NavigationSemantics.routePath.key: '/settings/notifications',
+            },
+          );
+        } catch (e) {
+          print('WARNING: Unable to verify spans: $e');
+          // Don't fail the test, we're just testing the observers work
+        }
+      },
+      timeout: const Timeout(Duration(seconds: 15)),
+    );
 
     testWidgets('Should create custom spans', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       await tester.pumpAndSettle();
 
       // Tap custom action button to create custom span
@@ -590,7 +638,9 @@ void main() {
       // Try to verify spans, but don't fail if they can't be verified
       try {
         // Wait for spans to be exported with a shorter timeout
-        await collector.waitForSpansWithTimeout(2); // Initial route + custom span
+        await collector.waitForSpansWithTimeout(
+          2,
+        ); // Initial route + custom span
 
         // Verify the custom span was created
         await collector.assertSpanExists(
@@ -598,7 +648,7 @@ void main() {
           attributes: {
             'interaction.type': 'button_click',
             'interaction.target': 'custom_action_button',
-          }
+          },
         );
       } catch (e) {
         print('WARNING: Unable to verify spans: $e');
@@ -606,61 +656,65 @@ void main() {
       }
     }, timeout: const Timeout(Duration(seconds: 10)));
 
-    testWidgets('Should handle complex lifecycle and navigation sequence', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'Should handle complex lifecycle and navigation sequence',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
 
-      final binding = tester.binding;
+        final binding = tester.binding;
 
-      // Sequence of actions with interleaved lifecycle and navigation events
+        // Sequence of actions with interleaved lifecycle and navigation events
 
-      // Navigate to profile
-      router.go('/profile');
-      await tester.pumpAndSettle();
+        // Navigate to profile
+        router.go('/profile');
+        await tester.pumpAndSettle();
 
-      // App goes to background
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      await tester.pump();
+        // App goes to background
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await tester.pump();
 
-      // App returns to foreground
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pump();
+        // App returns to foreground
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pump();
 
-      // Navigate to edit profile
-      router.go('/profile/edit');
-      await tester.pumpAndSettle();
+        // Navigate to edit profile
+        router.go('/profile/edit');
+        await tester.pumpAndSettle();
 
-      // App goes inactive
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-      await tester.pump();
+        // App goes inactive
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        await tester.pump();
 
-      // App becomes active again
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pump();
+        // App becomes active again
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pump();
 
-      // Force flush to ensure spans are exported
-      await FlutterOTel.tracerProvider.forceFlush();
+        // Force flush to ensure spans are exported
+        await FlutterOTel.tracerProvider.forceFlush();
 
-      // Try to verify spans, but don't fail if they can't be verified
-      try {
-        // Wait for spans to be exported with a shorter timeout
-        await collector.waitForSpansWithTimeout(7); // Initial + 2 navigation + 4 lifecycle
+        // Try to verify spans, but don't fail if they can't be verified
+        try {
+          // Wait for spans to be exported with a shorter timeout
+          await collector.waitForSpansWithTimeout(
+            7,
+          ); // Initial + 2 navigation + 4 lifecycle
 
-        // Verify span types exist (not specific attributes as they might vary)
-        await collector.assertSpanExists(
-          name: NavigationSemantics.navigationAction.key
-        );
+          // Verify span types exist (not specific attributes as they might vary)
+          await collector.assertSpanExists(
+            name: NavigationSemantics.navigationAction.key,
+          );
 
-        await collector.assertSpanExists(
-          name: AppLifecycleSemantics.appLifecycleChange.key
-        );
-      } catch (e) {
-        print('WARNING: Unable to verify spans: $e');
-        // Don't fail the test, we're just testing the observers work
-      }
-    }, timeout: const Timeout(Duration(seconds: 15)));
+          await collector.assertSpanExists(
+            name: AppLifecycleSemantics.appLifecycleChange.key,
+          );
+        } catch (e) {
+          print('WARNING: Unable to verify spans: $e');
+          // Don't fail the test, we're just testing the observers work
+        }
+      },
+      timeout: const Timeout(Duration(seconds: 15)),
+    );
   });
 }
 

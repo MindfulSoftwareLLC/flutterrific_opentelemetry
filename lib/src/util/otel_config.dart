@@ -3,8 +3,12 @@ import 'package:flutter/foundation.dart';
 
 /// OpenTelemetry endpoint configuration for different platforms and environments
 class OTelConfig {
-  static final endpointEnv = const String.fromEnvironment('OTEL_EXPORTER_OTLP_ENDPOINT');
-  static final protocolEnv = const String.fromEnvironment('OTEL_EXPORTER_OTLP_PROTOCOL');
+  static final endpointEnv = const String.fromEnvironment(
+    'OTEL_EXPORTER_OTLP_ENDPOINT',
+  );
+  static final protocolEnv = const String.fromEnvironment(
+    'OTEL_EXPORTER_OTLP_PROTOCOL',
+  );
 
   /// Determines the appropriate OTLP endpoint based on platform and environment
   static String get endpoint {
@@ -70,7 +74,10 @@ class OTelConfig {
   static const String webTracesEndpoint = 'http://localhost:4318/v1/traces';
 
   /// Get endpoint for specific platform (useful for testing)
-  static String getEndpointForPlatform(TargetPlatform platform, {bool isEmulator = false}) {
+  static String getEndpointForPlatform(
+    TargetPlatform platform, {
+    bool isEmulator = false,
+  }) {
     switch (platform) {
       case TargetPlatform.android:
         return isEmulator ? androidEmulatorEndpoint : localEndpoint;
@@ -113,13 +120,21 @@ class OTelConfig {
         print('Base Endpoint: $endpoint');
         print('Note: HTTP exporter will automatically append /v1/metrics');
       } else {
-        print('Platform: ${Platform.isAndroid ? 'Android' : Platform.isIOS ? 'iOS' : Platform.operatingSystem}');
+        print(
+          'Platform: ${Platform.isAndroid
+              ? 'Android'
+              : Platform.isIOS
+              ? 'iOS'
+              : Platform.operatingSystem}',
+        );
         print('Protocol: gRPC');
         print('Endpoint: $endpoint');
       }
       print('Secure: $secure');
       print('Port: $port');
-      print('Environment Override: ${endpointEnv.isEmpty ? 'None' : endpointEnv}');
+      print(
+        'Environment Override: ${endpointEnv.isEmpty ? 'None' : endpointEnv}',
+      );
       print('===================================');
     }
   }
@@ -145,9 +160,7 @@ class OTelConfig {
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       };
     } else {
-      return {
-        'Content-Type': 'application/x-protobuf',
-      };
+      return {'Content-Type': 'application/x-protobuf'};
     }
   }
 }

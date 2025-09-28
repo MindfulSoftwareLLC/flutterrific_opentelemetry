@@ -49,7 +49,8 @@ class UserInputTracker {
 
       // Record first input delay for each screen
       if (!_firstInputDelays.containsKey(metric.screenName)) {
-        _firstInputDelays[metric.screenName] = metric.responseTime ?? Duration.zero;
+        _firstInputDelays[metric.screenName] =
+            metric.responseTime ?? Duration.zero;
       }
 
       // Start tracking this interaction
@@ -69,9 +70,12 @@ class UserInputTracker {
         final interactionStart = _pendingInteractions[key];
 
         if (interactionStart != null) {
-          final responseTime = metric.attributes?['response_time'] != null ?
-              Duration(milliseconds: metric.attributes!['response_time'] as int) :
-              Duration.zero;
+          final responseTime =
+              metric.attributes?['response_time'] != null
+                  ? Duration(
+                    milliseconds: metric.attributes!['response_time'] as int,
+                  )
+                  : Duration.zero;
 
           final result = InteractionResult(
             screenName: componentName,

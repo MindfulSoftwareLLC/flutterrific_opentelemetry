@@ -67,7 +67,8 @@ class ShiftTracker {
       // Calculate a shift score based on performance duration
       // This is a simplified approximation - in a web context we'd use actual layout shift calculations
       double shiftScore = metric.duration.inMilliseconds / 100.0;
-      if (shiftScore > 0.01) { // Only report significant shifts
+      if (shiftScore > 0.01) {
+        // Only report significant shifts
         _reporter.reportLayoutShift(
           componentName,
           shiftScore,

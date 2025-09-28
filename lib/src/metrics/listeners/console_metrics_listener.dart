@@ -11,7 +11,8 @@ import '../trackers/error_tracker.dart';
 import '../flutter_metric_reporter.dart';
 
 class ConsoleMetricsListener {
-  static final ConsoleMetricsListener _instance = ConsoleMetricsListener._internal();
+  static final ConsoleMetricsListener _instance =
+      ConsoleMetricsListener._internal();
   factory ConsoleMetricsListener() => _instance;
 
   late final PageTracker _pageTracker;
@@ -127,7 +128,9 @@ class ConsoleMetricsListener {
     debugPrint('  Message: ${metric.error}');
     if (metric.stackTrace != null) {
       debugPrint('  Stack Trace:');
-      debugPrint('    ${metric.stackTrace.toString().split('\n').take(3).join('\n    ')}');
+      debugPrint(
+        '    ${metric.stackTrace.toString().split('\n').take(3).join('\n    ')}',
+      );
     }
     if (metric.attributes != null) {
       debugPrint('  Context:');
@@ -144,7 +147,9 @@ class ConsoleMetricsListener {
         final summary = _errorTracker.getErrorSummary(errorType.toString());
         debugPrint('  Error Summary:');
         debugPrint('    Occurrences: ${summary.occurrences}');
-        debugPrint('    Affected Components: ${summary.affectedComponents.join(', ')}');
+        debugPrint(
+          '    Affected Components: ${summary.affectedComponents.join(', ')}',
+        );
       } catch (_) {
         // Summary not available yet
       }

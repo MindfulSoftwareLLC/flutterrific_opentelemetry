@@ -26,26 +26,32 @@ class FlutterOTelMetrics {
 
     switch (metricType.toLowerCase()) {
       case 'counter':
-        meter.createCounter(
-          name: name,
-          description: 'Custom flutter metric',
-          unit: unit,
-        ).add(value, attrs);
+        meter
+            .createCounter(
+              name: name,
+              description: 'Custom flutter metric',
+              unit: unit,
+            )
+            .add(value, attrs);
         break;
       case 'gauge':
-        meter.createGauge(
-          name: name,
-          description: 'Custom flutter metric',
-          unit: unit,
-        ).record(value, attrs);
+        meter
+            .createGauge(
+              name: name,
+              description: 'Custom flutter metric',
+              unit: unit,
+            )
+            .record(value, attrs);
         break;
       case 'histogram':
       default:
-        meter.createHistogram(
-          name: name,
-          description: 'Custom flutter metric',
-          unit: unit,
-        ).record(value, attrs);
+        meter
+            .createHistogram(
+              name: name,
+              description: 'Custom flutter metric',
+              unit: unit,
+            )
+            .record(value, attrs);
         break;
     }
   }
@@ -61,10 +67,7 @@ class FlutterOTelMetrics {
       value: duration.inMilliseconds,
       unit: 'ms',
       metricType: 'histogram',
-      attributes: {
-        'perf.metric.name': name,
-        ...?attributes,
-      },
+      attributes: {'perf.metric.name': name, ...?attributes},
     );
   }
 

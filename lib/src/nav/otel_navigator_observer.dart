@@ -24,7 +24,7 @@ class OTelNavigatorObserver extends NavigatorObserver {
     recordNavigationChange(
       newOTelRouteData,
       currentRouteData,
-      newRouteChangeType
+      newRouteChangeType,
     );
     currentRouteData = newOTelRouteData;
   }

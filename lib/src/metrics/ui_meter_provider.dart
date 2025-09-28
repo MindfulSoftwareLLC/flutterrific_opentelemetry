@@ -24,7 +24,10 @@ class UIMeterProvider implements MeterProvider {
   /// Creates an appropriate metric exporter based on the current platform
   ///
   /// This will return an HTTP exporter for web and a gRPC exporter for native platforms
-  MetricExporter createPlatformMetricExporter(String endpoint, {bool insecure = false}) {
+  MetricExporter createPlatformMetricExporter(
+    String endpoint, {
+    bool insecure = false,
+  }) {
     return PlatformDetection.createMetricExporter(
       endpoint: endpoint,
       insecure: insecure,
@@ -39,12 +42,14 @@ class UIMeterProvider implements MeterProvider {
     Attributes? attributes,
   }) {
     // Get the base meter from the delegate
-    final apiMeter = _delegate.getMeter(
-      name: name,
-      version: version,
-      schemaUrl: schemaUrl,
-      attributes: attributes,
-    ) as Meter;
+    final apiMeter =
+        _delegate.getMeter(
+              name: name,
+              version: version,
+              schemaUrl: schemaUrl,
+              attributes: attributes,
+            )
+            as Meter;
 
     // Wrap it in our UIMeter
     return UIMeterCreate.create(delegate: apiMeter);
@@ -62,7 +67,9 @@ class UIMeterProvider implements MeterProvider {
     } catch (e) {
       // Fallback to local implementation if the delegate doesn't support it
       if (OTelLog.isLogMetrics()) {
-        OTelLog.logMetric('UIMeterProvider: Could not delegate registerInstrument, using local implementation');
+        OTelLog.logMetric(
+          'UIMeterProvider: Could not delegate registerInstrument, using local implementation',
+        );
       }
     }
 
@@ -74,7 +81,9 @@ class UIMeterProvider implements MeterProvider {
     _instruments[meterName]!.add(instrument);
 
     if (OTelLog.isLogMetrics()) {
-      OTelLog.logMetric('UIMeterProvider: Registered instrument "${instrument.name}" for meter "$meterName"');
+      OTelLog.logMetric(
+        'UIMeterProvider: Registered instrument "${instrument.name}" for meter "$meterName"',
+      );
     }
   }
 
@@ -92,7 +101,9 @@ class UIMeterProvider implements MeterProvider {
     } catch (e) {
       // Fallback to local implementation if the delegate doesn't support it
       if (OTelLog.isLogMetrics()) {
-        OTelLog.logMetric('UIMeterProvider: Could not delegate collectAllMetrics, using local implementation');
+        OTelLog.logMetric(
+          'UIMeterProvider: Could not delegate collectAllMetrics, using local implementation',
+        );
       }
     }
 
@@ -109,7 +120,9 @@ class UIMeterProvider implements MeterProvider {
       final instruments = entry.value;
 
       if (OTelLog.isLogMetrics()) {
-        OTelLog.logMetric('UIMeterProvider: Collecting metrics from ${instruments.length} instruments in meter "$meterName"');
+        OTelLog.logMetric(
+          'UIMeterProvider: Collecting metrics from ${instruments.length} instruments in meter "$meterName"',
+        );
       }
 
       // Collect metrics from each instrument
@@ -120,19 +133,25 @@ class UIMeterProvider implements MeterProvider {
             allMetrics.addAll(metrics);
 
             if (OTelLog.isLogMetrics()) {
-              OTelLog.logMetric('UIMeterProvider: Collected ${metrics.length} metrics from instrument "${instrument.name}"');
+              OTelLog.logMetric(
+                'UIMeterProvider: Collected ${metrics.length} metrics from instrument "${instrument.name}"',
+              );
             }
           }
         } catch (e) {
           if (OTelLog.isLogMetrics()) {
-            OTelLog.logMetric('UIMeterProvider: Error collecting metrics from instrument "${instrument.name}": $e');
+            OTelLog.logMetric(
+              'UIMeterProvider: Error collecting metrics from instrument "${instrument.name}": $e',
+            );
           }
         }
       }
     }
 
     if (OTelLog.isLogMetrics()) {
-      OTelLog.logMetric('UIMeterProvider: Collected ${allMetrics.length} total metrics');
+      OTelLog.logMetric(
+        'UIMeterProvider: Collected ${allMetrics.length} total metrics',
+      );
     }
 
     return allMetrics;

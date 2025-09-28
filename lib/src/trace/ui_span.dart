@@ -16,10 +16,13 @@ class UISpan implements Span {
   final UISpanType? _uiSpanType;
   final AppLifecycleState? _lifecycleState;
 
-  UISpan._(Span delegate, {UISpanType? uiSpanType, AppLifecycleState? lifecycleState})
-    : _delegate = delegate,
-      _uiSpanType = uiSpanType,
-    _lifecycleState = lifecycleState;
+  UISpan._(
+    Span delegate, {
+    UISpanType? uiSpanType,
+    AppLifecycleState? lifecycleState,
+  }) : _delegate = delegate,
+       _uiSpanType = uiSpanType,
+       _lifecycleState = lifecycleState;
 
   /// If set, the type of span: Navigation, appLifecycle, etc.
   /// Spans created automatically by Flutterrific OTel have UISpanTypes
@@ -44,7 +47,8 @@ class UISpan implements Span {
       _delegate.addAttributes(attributes);
 
   @override
-  void addEvent(SpanEvent spanEvent, [Attributes? attributes]) => _delegate.addEvent(spanEvent);
+  void addEvent(SpanEvent spanEvent, [Attributes? attributes]) =>
+      _delegate.addEvent(spanEvent);
 
   @override
   void addEventNow(String name, [Attributes? attributes]) =>
@@ -174,6 +178,6 @@ class UISpan implements Span {
 
   @override
   bool isInstanceOf(Type type) {
-    return Type == this.runtimeType;
+    return Type == runtimeType;
   }
 }

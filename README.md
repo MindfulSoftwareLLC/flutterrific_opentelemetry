@@ -18,9 +18,13 @@ The `main.dart` and `router.dart` show how to set up your app with Flutterrific 
 
 This Flutter SDK implements the [OpenTelemetry](https://opentelemetry.io/) specification, enabling developers to collect distributed traces and metrics from Flutter applications (logs coming soon). OpenTelemetry is a vendor-neutral standard for observability and is the second most active [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) project, after Kubernetes.
 
+The CNCF OpenTelemetry Client Group is currently working on the specification for how
+OTel works on client apps. Flutterrific will follow the client spec as it matures.
+
 ## Why OpenTelemetry for Flutter?
 
 - **Report Errors**: Get notified of errors in real time.
+- **App Lifecycle**: When users launch, pause, resume and quit an application.
 - **Watch Your Users**: Where do users spend their time? Increase conversion rates. 
 - **Get Metrics**: How fast do your routes load IRL?
 - **Future-Proof**: OpenTelemetry is an industry standard with broad ecosystem support
@@ -48,7 +52,7 @@ This Flutter SDK implements the [OpenTelemetry](https://opentelemetry.io/) speci
 
 ```yaml
 dependencies:
-  flutterrific_opentelemetry: ^0.3.0
+  flutterrific_opentelemetry: ^0.3.3
 ```
 
 ### 2. Initialize OpenTelemetry
@@ -145,47 +149,39 @@ ComplexWidget().withOTelPerformanceTracking('complex_widget');
 RiskyWidget().withOTelErrorBoundary('risky_operation');
 ```
 
-## Configuration
-
-### Environment Variables
-
-Standard OpenTelemetry environment variables are supported:
-
-```bash
-# Exporter endpoint
---dart-define=OTEL_EXPORTER_OTLP_ENDPOINT=https://your-collector:4317
-
-# Protocol selection (grpc or http/protobuf)
---dart-define=OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-
-# Service information
---dart-define=OTEL_SERVICE_NAME=my-flutter-app
---dart-define=OTEL_SERVICE_VERSION=1.0.0
-```
-
-### Local Development
-
-For local development, run an OpenTelemetry collector on localhost:4317, the default. 
-
-```bash
-docker run -p 4317:4317 -p 4318:4318 --rm -ti grafana/otel-lgtm
-```
-
-## Documentation
-
-- [Getting Started Guide](https://pub.dev/packages/flutterrific_opentelemetry#getting-started)
-- [API Reference](https://pub.dev/documentation/flutterrific_opentelemetry/latest/)
-- [Migration Guide](VERSIONING.md)
-- [Best Practices](https://dartastic.io/docs/best-practices)
-
+    ## Configuration
+    
+    ### Environment Variables
+    
+    Standard OpenTelemetry environment variables are supported:
+    
+    ```bash
+    # Exporter endpoint
+    --dart-define=OTEL_EXPORTER_OTLP_ENDPOINT=https://your-collector:4317
+    
+    # Protocol selection (default is http/protobuf as per OTel spec)
+    --dart-define=OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+    
+    # Service information
+    --dart-define=OTEL_SERVICE_NAME=my-flutter-app
+    --dart-define=OTEL_SERVICE_VERSION=1.0.0
+    ```
+    
+    ### Local Development
+    
+    For local development, run an OpenTelemetry collector on localhost:4317, the default. 
+    
+    ```bash
+    docker run -p 3000:3000 -p 4317:4317 -p 4318:4318 --rm -ti grafana/otel-lgtm
+    ```
 ## Examples
 
 - [Basic Integration Example](example/)
-- [Wonderous OpenTelemetry](https://pub.dev/packages/wonderous_opentelemetry) - Complete app example
+- [Wonderous OpenTelemetry](https://github.com/MindfulSoftwareLLC/wondrous_opentelemetry) - Complete app example based on Wonderous
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We are looking for contributors and maintainers! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -230,13 +226,13 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ## Community
 
 - [GitHub Issues](https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry/issues) - Bug reports and feature requests
-- [GitHub Discussions](https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry/discussions) - Community discussions
 - [OpenTelemetry Community](https://opentelemetry.io/community/) - Broader OpenTelemetry community
 
 ## Acknowledgments
 
 Built on the foundation of:
 - [Dartastic OpenTelemetry SDK](https://pub.dev/packages/dartastic_opentelemetry)
+- [Dartastic OpenTelemetry API](https://pub.dev/packages/dartastic_opentelemetry_api)
 - [OpenTelemetry Specification](https://opentelemetry.io/docs/specs/otel/)
 - [Flutter Framework](https://flutter.dev/)
 

@@ -5,11 +5,7 @@ part of 'ui_tracer_provider.dart';
 
 /// Factory for creating UITracer instances
 class UITracerProviderCreate {
-  static UITracerProvider create({
-    required TracerProvider delegate,
-  }) {
-    return UITracerProvider._(
-        delegate: delegate,
-    );
+  static UITracerProvider create({required TracerProvider delegate}) {
+    return UITracerProvider._(delegate: delegate);
   }
 }

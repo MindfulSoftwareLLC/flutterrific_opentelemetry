@@ -15,7 +15,7 @@ class RealCollector {
   final String _configPath;
 
   RealCollector({
-    this.port = 4316,  // Use non-standard port by default
+    this.port = 4316, // Use non-standard port by default
     required String configPath,
     required String outputPath,
   }) : _configPath = configPath,
@@ -26,14 +26,12 @@ class RealCollector {
     final execPath = '${Directory.current.path}/test/testing_utils/otelcol';
     if (!File(execPath).existsSync()) {
       throw StateError(
-          'OpenTelemetry Collector not found at $execPath. Copy the testing_utils directory from dartastic_opentelemetry.');
+        'OpenTelemetry Collector not found at $execPath. Copy the testing_utils directory from dartastic_opentelemetry.',
+      );
     }
 
     // Start collector with our config
-    _process = await Process.start(
-      execPath,
-      ['--config', _configPath],
-    );
+    _process = await Process.start(execPath, ['--config', _configPath]);
 
     // Listen for output/errors for debugging
     _process!.stdout.transform(utf8.decoder).listen((line) {
@@ -90,7 +88,9 @@ class RealCollector {
       if (data.containsKey('resourceSpans')) {
         for (final resourceSpan in data['resourceSpans'] as List) {
           final resource = resourceSpan['resource'] as Map<String, dynamic>?;
-          final resourceAttrs = _parseAttributes(resource?['attributes'] as List?);
+          final resourceAttrs = _parseAttributes(
+            resource?['attributes'] as List?,
+          );
 
           for (final scopeSpans in resourceSpan['scopeSpans'] as List) {
             for (final span in scopeSpans['spans'] as List) {
@@ -163,11 +163,15 @@ class RealCollector {
     final spans = await getSpans();
     throw TimeoutException(
       'Timed out waiting for $count spans. '
-      'Found ${spans.length} spans: ${json.encode(spans)}');
+      'Found ${spans.length} spans: ${json.encode(spans)}',
+    );
   }
 
   /// Wait for spans with timeout but don't throw an exception
-  Future<bool> waitForSpansWithTimeout(int count, {Duration timeout = const Duration(seconds: 5)}) async {
+  Future<bool> waitForSpansWithTimeout(
+    int count, {
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
     try {
       await waitForSpans(count, timeout: timeout);
       return true;
@@ -193,27 +197,31 @@ class RealCollector {
     while (DateTime.now().isBefore(deadline)) {
       spans = await getSpans();
 
-      matching = spans.where((span) {
-        if (name != null && span['name'] != name) return false;
-        if (traceId != null && span['traceId'] != traceId) return false;
-        if (spanId != null && span['spanId'] != spanId) return false;
+      matching =
+          spans.where((span) {
+            if (name != null && span['name'] != name) return false;
+            if (traceId != null && span['traceId'] != traceId) return false;
+            if (spanId != null && span['spanId'] != spanId) return false;
 
-        if (attributes != null) {
-          // Check both span attributes and resource attributes
-          final spanAttrs = _parseAttributes(span['attributes'] as List?);
-          final resourceAttrs = span['resourceAttributes'] as Map<String, dynamic>?;
-          final allAttrs = {...?resourceAttrs, ...spanAttrs};
+            if (attributes != null) {
+              // Check both span attributes and resource attributes
+              final spanAttrs = _parseAttributes(span['attributes'] as List?);
+              final resourceAttrs =
+                  span['resourceAttributes'] as Map<String, dynamic>?;
+              final allAttrs = {...?resourceAttrs, ...spanAttrs};
 
-          for (final entry in attributes.entries) {
-            if (allAttrs[entry.key] != entry.value) {
-              print('Attribute mismatch for ${entry.key}: expected ${entry.value}, got ${allAttrs[entry.key]}');
-              return false;
+              for (final entry in attributes.entries) {
+                if (allAttrs[entry.key] != entry.value) {
+                  print(
+                    'Attribute mismatch for ${entry.key}: expected ${entry.value}, got ${allAttrs[entry.key]}',
+                  );
+                  return false;
+                }
+              }
             }
-          }
-        }
 
-        return true;
-      }).toList();
+            return true;
+          }).toList();
 
       if (matching.isNotEmpty) {
         return;
@@ -229,7 +237,9 @@ class RealCollector {
         if (traceId != null) 'traceId': traceId,
         if (spanId != null) 'spanId': spanId,
       };
-      print('No matching span found.\nCriteria: ${json.encode(criteria)}\nFound ${spans.length} spans');
+      print(
+        'No matching span found.\nCriteria: ${json.encode(criteria)}\nFound ${spans.length} spans',
+      );
       if (spans.isNotEmpty) {
         print('Sample span: ${json.encode(spans.first)}');
       }

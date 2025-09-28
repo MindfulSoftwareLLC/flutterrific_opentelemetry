@@ -8,12 +8,8 @@ class UITracerCreate {
   static UITracer create({
     required sdk.Tracer delegate,
     required sdk.TracerProvider provider,
-    sdk.Sampler? sampler
+    sdk.Sampler? sampler,
   }) {
-    return UITracer._(
-      delegate: delegate,
-      provider: provider,
-      sampler: sampler
-    );
+    return UITracer._(delegate: delegate, provider: provider, sampler: sampler);
   }
 }

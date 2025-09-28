@@ -41,7 +41,9 @@ class ConsoleMetricListener implements MetricListenerBase {
     required String actionType,
     Map<String, dynamic>? attributes,
   }) {
-    debugPrint('👆 User Interaction - Screen: $screenName, Action: $actionType');
+    debugPrint(
+      '👆 User Interaction - Screen: $screenName, Action: $actionType',
+    );
     if (attributes != null) {
       debugPrint('📝 Attributes: $attributes');
     }
@@ -49,7 +51,10 @@ class ConsoleMetricListener implements MetricListenerBase {
   }
 
   @override
-  void reportNavigationChange(Route<dynamic>? route, Route<dynamic>? previousRoute) {
+  void reportNavigationChange(
+    Route<dynamic>? route,
+    Route<dynamic>? previousRoute,
+  ) {
     debugPrint('🔄 Navigation Change');
     debugPrint('📍 From: ${previousRoute?.settings.name ?? 'unknown'}');
     debugPrint('📍 To: ${route?.settings.name ?? 'unknown'}');

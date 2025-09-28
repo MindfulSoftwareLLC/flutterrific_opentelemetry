@@ -27,7 +27,10 @@ class PlatformDetection {
     bool insecure = false,
   }) {
     // Get endpoint from environment variable if not provided
-    final resolvedEndpoint = OTelConfig.endpointEnv;
+    final envEndpoint = OTelConfig.endpointEnv;
+    final resolvedEndpoint =
+        endpoint ??
+        (envEndpoint.isNotEmpty ? envEndpoint : 'http://localhost:4317');
 
     // Get protocol from environment variable
     final envProtocol = OTelConfig.protocolEnv;
@@ -39,12 +42,17 @@ class PlatformDetection {
     if (envProtocol.isNotEmpty) {
       if (envProtocol.toLowerCase() == 'http/protobuf') {
         useHttp = true;
-        if (OTelLog.isDebug()) OTelLog.debug('Using HTTP/protobuf protocol as configured');
+        if (OTelLog.isDebug())
+          OTelLog.debug('Using HTTP/protobuf protocol as configured');
       } else if (envProtocol.toLowerCase() == 'grpc') {
         useHttp = false;
-        if (OTelLog.isDebug()) OTelLog.debug('Using gRPC protocol as configured');
+        if (OTelLog.isDebug())
+          OTelLog.debug('Using gRPC protocol as configured');
       } else {
-        if (OTelLog.isWarn()) OTelLog.warn('Unknown OTEL_EXPORTER_OTLP_PROTOCOL: $envProtocol, defaulting to ${useHttp ? "HTTP/protobuf" : "gRPC"}');
+        if (OTelLog.isWarn())
+          OTelLog.warn(
+            'Unknown OTEL_EXPORTER_OTLP_PROTOCOL: $envProtocol, defaulting to ${useHttp ? "HTTP/protobuf" : "gRPC"}',
+          );
       }
     }
 
@@ -52,8 +60,10 @@ class PlatformDetection {
     if (useHttp) {
       // Ensure endpoint is HTTP URLs for HTTP/protobuf
       String httpEndpoint = resolvedEndpoint;
-      if (!httpEndpoint.toLowerCase().startsWith('http://') && !httpEndpoint.toLowerCase().startsWith('https://')) {
-        httpEndpoint = insecure ? 'http://$httpEndpoint' : 'https://$httpEndpoint';
+      if (!httpEndpoint.toLowerCase().startsWith('http://') &&
+          !httpEndpoint.toLowerCase().startsWith('https://')) {
+        httpEndpoint =
+            insecure ? 'http://$httpEndpoint' : 'https://$httpEndpoint';
       }
 
       // For HTTP, we need to ensure the port is 4318 if not specified
@@ -64,7 +74,10 @@ class PlatformDetection {
         httpEndpoint = httpEndpoint.replaceAll(':4317', ':4318');
       }
 
-      if (OTelLog.isDebug()) OTelLog.debug('Creating OtlpHttpSpanExporter with endpoint: $httpEndpoint');
+      if (OTelLog.isDebug())
+        OTelLog.debug(
+          'Creating OtlpHttpSpanExporter with endpoint: $httpEndpoint',
+        );
       return OtlpHttpSpanExporter(
         OtlpHttpExporterConfig(
           endpoint: httpEndpoint,
@@ -76,19 +89,20 @@ class PlatformDetection {
       String grpcEndpoint = resolvedEndpoint;
 
       // Remove http/https from the endpoint for gRPC
-      if (grpcEndpoint.toLowerCase().startsWith('http://') || grpcEndpoint.toLowerCase().startsWith('https://')) {
+      if (grpcEndpoint.toLowerCase().startsWith('http://') ||
+          grpcEndpoint.toLowerCase().startsWith('https://')) {
         bool isSecure = grpcEndpoint.toLowerCase().startsWith('https://');
         grpcEndpoint = grpcEndpoint.replaceAll(RegExp(r'^(http|https)://'), '');
         // If insecure wasn't explicitly set, use the protocol from the URL
         insecure = insecure || !isSecure;
       }
 
-      if (OTelLog.isDebug()) OTelLog.debug('Creating OtlpGrpcSpanExporter with endpoint: $grpcEndpoint, insecure: $insecure');
+      if (OTelLog.isDebug())
+        OTelLog.debug(
+          'Creating OtlpGrpcSpanExporter with endpoint: $grpcEndpoint, insecure: $insecure',
+        );
       return OtlpGrpcSpanExporter(
-        OtlpGrpcExporterConfig(
-          endpoint: grpcEndpoint,
-          insecure: insecure,
-        ),
+        OtlpGrpcExporterConfig(endpoint: grpcEndpoint, insecure: insecure),
       );
     }
   }
@@ -109,11 +123,17 @@ class PlatformDetection {
     bool insecure = false,
   }) {
     // Get endpoint from environment variable if not provided
-    final envEndpoint = const String.fromEnvironment('OTEL_EXPORTER_OTLP_ENDPOINT');
-    final resolvedEndpoint = endpoint ?? (envEndpoint.isNotEmpty ? envEndpoint : 'http://localhost:4317');
+    final envEndpoint = const String.fromEnvironment(
+      'OTEL_EXPORTER_OTLP_ENDPOINT',
+    );
+    final resolvedEndpoint =
+        endpoint ??
+        (envEndpoint.isNotEmpty ? envEndpoint : 'http://localhost:4317');
 
     // Get protocol from environment variable
-    final envProtocol = const String.fromEnvironment('OTEL_EXPORTER_OTLP_PROTOCOL');
+    final envProtocol = const String.fromEnvironment(
+      'OTEL_EXPORTER_OTLP_PROTOCOL',
+    );
 
     // Determine if we should use HTTP/protobuf
     bool useHttp = isWeb; // Always use HTTP for web
@@ -122,12 +142,19 @@ class PlatformDetection {
     if (envProtocol.isNotEmpty) {
       if (envProtocol.toLowerCase() == 'http/protobuf') {
         useHttp = true;
-        if (OTelLog.isDebug()) OTelLog.debug('Using HTTP/protobuf protocol for metrics as configured');
+        if (OTelLog.isDebug())
+          OTelLog.debug(
+            'Using HTTP/protobuf protocol for metrics as configured',
+          );
       } else if (envProtocol.toLowerCase() == 'grpc') {
         useHttp = false;
-        if (OTelLog.isDebug()) OTelLog.debug('Using gRPC protocol for metrics as configured');
+        if (OTelLog.isDebug())
+          OTelLog.debug('Using gRPC protocol for metrics as configured');
       } else {
-        if (OTelLog.isWarn()) OTelLog.warn('Unknown OTEL_EXPORTER_OTLP_PROTOCOL: $envProtocol, defaulting to ${useHttp ? "HTTP/protobuf" : "gRPC"} for metrics');
+        if (OTelLog.isWarn())
+          OTelLog.warn(
+            'Unknown OTEL_EXPORTER_OTLP_PROTOCOL: $envProtocol, defaulting to ${useHttp ? "HTTP/protobuf" : "gRPC"} for metrics',
+          );
       }
     }
 
@@ -135,8 +162,10 @@ class PlatformDetection {
     if (useHttp) {
       // Ensure endpoint is HTTP URLs for HTTP/protobuf
       String httpEndpoint = resolvedEndpoint;
-      if (!httpEndpoint.toLowerCase().startsWith('http://') && !httpEndpoint.toLowerCase().startsWith('https://')) {
-        httpEndpoint = insecure ? 'http://$httpEndpoint' : 'https://$httpEndpoint';
+      if (!httpEndpoint.toLowerCase().startsWith('http://') &&
+          !httpEndpoint.toLowerCase().startsWith('https://')) {
+        httpEndpoint =
+            insecure ? 'http://$httpEndpoint' : 'https://$httpEndpoint';
       }
 
       // For HTTP, we need to ensure the port is 4318 if not specified
@@ -147,7 +176,10 @@ class PlatformDetection {
         httpEndpoint = httpEndpoint.replaceAll(':4317', ':4318');
       }
 
-      if (OTelLog.isDebug()) OTelLog.debug('Creating OtlpHttpMetricExporter with endpoint: $httpEndpoint');
+      if (OTelLog.isDebug())
+        OTelLog.debug(
+          'Creating OtlpHttpMetricExporter with endpoint: $httpEndpoint',
+        );
       return OtlpHttpMetricExporter(
         OtlpHttpMetricExporterConfig(
           endpoint: httpEndpoint,
@@ -159,14 +191,18 @@ class PlatformDetection {
       String grpcEndpoint = resolvedEndpoint;
 
       // Remove http/https from the endpoint for gRPC
-      if (grpcEndpoint.toLowerCase().startsWith('http://') || grpcEndpoint.toLowerCase().startsWith('https://')) {
+      if (grpcEndpoint.toLowerCase().startsWith('http://') ||
+          grpcEndpoint.toLowerCase().startsWith('https://')) {
         bool isSecure = grpcEndpoint.toLowerCase().startsWith('https://');
         grpcEndpoint = grpcEndpoint.replaceAll(RegExp(r'^(http|https)://'), '');
         // If insecure wasn't explicitly set, use the protocol from the URL
         insecure = insecure || !isSecure;
       }
 
-      if (OTelLog.isDebug()) OTelLog.debug('Creating OtlpGrpcMetricExporter with endpoint: $grpcEndpoint, insecure: $insecure');
+      if (OTelLog.isDebug())
+        OTelLog.debug(
+          'Creating OtlpGrpcMetricExporter with endpoint: $grpcEndpoint, insecure: $insecure',
+        );
       return OtlpGrpcMetricExporter(
         OtlpGrpcMetricExporterConfig(
           endpoint: grpcEndpoint,
@@ -186,7 +222,11 @@ class PlatformDetection {
   /// - The URL doesn't start with http:// or https://
   ///
   /// Returns the adjusted endpoint string
-  static String adjustEndpoint(String endpoint, {bool insecure = false, bool? forceHttp}) {
+  static String adjustEndpoint(
+    String endpoint, {
+    bool insecure = false,
+    bool? forceHttp,
+  }) {
     final useHttp = forceHttp ?? isWeb;
 
     if (useHttp) {
@@ -194,8 +234,10 @@ class PlatformDetection {
       String httpEndpoint = endpoint;
 
       // Ensure it starts with http:// or https://
-      if (!httpEndpoint.toLowerCase().startsWith('http://') && !httpEndpoint.toLowerCase().startsWith('https://')) {
-        httpEndpoint = insecure ? 'http://$httpEndpoint' : 'https://$httpEndpoint';
+      if (!httpEndpoint.toLowerCase().startsWith('http://') &&
+          !httpEndpoint.toLowerCase().startsWith('https://')) {
+        httpEndpoint =
+            insecure ? 'http://$httpEndpoint' : 'https://$httpEndpoint';
       }
 
       // Change port 4317 to 4318 if present
@@ -209,7 +251,8 @@ class PlatformDetection {
       String grpcEndpoint = endpoint;
 
       // Remove http/https from the endpoint
-      if (grpcEndpoint.toLowerCase().startsWith('http://') || grpcEndpoint.toLowerCase().startsWith('https://')) {
+      if (grpcEndpoint.toLowerCase().startsWith('http://') ||
+          grpcEndpoint.toLowerCase().startsWith('https://')) {
         grpcEndpoint = grpcEndpoint.replaceAll(RegExp(r'^(http|https)://'), '');
       }
 

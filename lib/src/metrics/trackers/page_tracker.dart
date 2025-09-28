@@ -30,14 +30,18 @@ class PageTracker {
     });
 
     _navigationSubscription = _reporter.navigationStream.listen((metric) {
-      debugPrint('PageTracker: Received navigation metric for route: ${metric.toRoute}');
+      debugPrint(
+        'PageTracker: Received navigation metric for route: ${metric.toRoute}',
+      );
       if (metric.toRoute != null) {
         // Record the start time of navigation to calculate total transition time
         _navigationStartTimes[metric.toRoute!] = metric.timestamp;
 
         // If we have a fromRoute, we can calculate the transition duration
         if (metric.fromRoute != null) {
-          debugPrint('PageTracker: Processing navigation from ${metric.fromRoute} to ${metric.toRoute}');
+          debugPrint(
+            'PageTracker: Processing navigation from ${metric.fromRoute} to ${metric.toRoute}',
+          );
           final lastLoadTime = _pageLoadHistory[metric.fromRoute]?.lastOrNull;
           if (lastLoadTime != null) {
             // Report the complete navigation duration for the previous page
@@ -48,7 +52,9 @@ class PageTracker {
               attributes: {
                 'to_route': metric.toRoute,
                 'navigation_type': metric.navigationType,
-                'total_transition_time': metric.timestamp.difference(_navigationStartTimes[metric.fromRoute]!),
+                'total_transition_time': metric.timestamp.difference(
+                  _navigationStartTimes[metric.fromRoute]!,
+                ),
               },
             );
           }
@@ -70,7 +76,9 @@ class PageTracker {
   }
 
   void _processPageLoadMetric(PageLoadMetric metric) {
-    debugPrint('PageTracker: Processing page load metric for ${metric.pageName}');
+    debugPrint(
+      'PageTracker: Processing page load metric for ${metric.pageName}',
+    );
     if (!_pageLoadHistory.containsKey(metric.pageName)) {
       _pageLoadHistory[metric.pageName] = [];
     }
@@ -80,7 +88,9 @@ class PageTracker {
     final navigationStart = _navigationStartTimes[metric.pageName];
     if (navigationStart != null) {
       final totalTransitionTime = metric.timestamp.difference(navigationStart);
-      debugPrint('PageTracker: Calculated total transition time: ${totalTransitionTime.inMilliseconds}ms');
+      debugPrint(
+        'PageTracker: Calculated total transition time: ${totalTransitionTime.inMilliseconds}ms',
+      );
       _reporter.reportPerformanceMetric(
         'total_page_transition',
         totalTransitionTime,
@@ -88,7 +98,9 @@ class PageTracker {
           'page': metric.pageName,
           'transition_type': metric.transitionType,
           'load_time': metric.loadTime.inMilliseconds,
-          'transition_overhead': totalTransitionTime.inMilliseconds - metric.loadTime.inMilliseconds,
+          'transition_overhead':
+              totalTransitionTime.inMilliseconds -
+              metric.loadTime.inMilliseconds,
         },
       );
       _navigationStartTimes.remove(metric.pageName);
@@ -100,7 +112,9 @@ class PageTracker {
     if (times == null || times.isEmpty) return null;
 
     final total = times.reduce((a, b) => a + b);
-    return Duration(microseconds: (total.inMicroseconds / times.length).round());
+    return Duration(
+      microseconds: (total.inMicroseconds / times.length).round(),
+    );
   }
 
   Map<String, Duration> getAllAverageLoadTimes() {
@@ -108,7 +122,9 @@ class PageTracker {
     _pageLoadHistory.forEach((route, times) {
       if (times.isNotEmpty) {
         final total = times.reduce((a, b) => a + b);
-        averages[route] = Duration(microseconds: (total.inMicroseconds / times.length).round());
+        averages[route] = Duration(
+          microseconds: (total.inMicroseconds / times.length).round(),
+        );
       }
     });
     return averages;

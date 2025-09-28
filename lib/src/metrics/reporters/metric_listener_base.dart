@@ -22,5 +22,8 @@ abstract class MetricListenerBase {
     Map<String, dynamic>? attributes,
   });
 
-  void reportNavigationChange(Route<dynamic>? route, Route<dynamic>? previousRoute);
+  void reportNavigationChange(
+    Route<dynamic>? route,
+    Route<dynamic>? previousRoute,
+  );
 }

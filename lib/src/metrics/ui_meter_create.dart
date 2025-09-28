@@ -5,9 +5,7 @@ part of 'ui_meter.dart';
 
 /// Factory for creating UITracer instances
 class UIMeterCreate {
-  static UIMeter create({
-    required Meter delegate
-  }) {
+  static UIMeter create({required Meter delegate}) {
     return UIMeter._(delegate);
   }
 }

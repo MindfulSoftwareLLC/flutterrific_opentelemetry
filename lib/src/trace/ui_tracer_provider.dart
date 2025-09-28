@@ -13,7 +13,8 @@ class UITracerProvider implements TracerProvider {
   UITracerProvider._({required TracerProvider delegate}) : _delegate = delegate;
 
   @override
-  Tracer getTracer(String name, {
+  Tracer getTracer(
+    String name, {
     String? version,
     String? schemaUrl,
     Attributes? attributes,
@@ -26,16 +27,18 @@ class UITracerProvider implements TracerProvider {
     final key = '$name:${version ?? ''}';
     return _tracers.putIfAbsent(
       key,
-          () => UITracerCreate.create(
-        delegate: _delegate.getTracer(
-          name,
-          version: version,
-          schemaUrl: schemaUrl,
-          attributes: attributes,
-        ),
-        provider: this,
-        sampler: sampler,
-      ) as Tracer,
+      () =>
+          UITracerCreate.create(
+                delegate: _delegate.getTracer(
+                  name,
+                  version: version,
+                  schemaUrl: schemaUrl,
+                  attributes: attributes,
+                ),
+                provider: this,
+                sampler: sampler,
+              )
+              as Tracer,
     );
   }
 

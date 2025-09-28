@@ -174,9 +174,7 @@ void main() {
 
     testWidgets('Should track initial route', (tester) async {
       // First page will be the initial route
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       await tester.pumpAndSettle();
 
       // Verify initial page is showing
@@ -187,122 +185,168 @@ void main() {
       expect(navigatorObserver.currentRouteData?.timestamp, isNotNull);
       expect(navigatorObserver.currentRouteData, isNotNull);
       expect(navigatorObserver.currentRouteData?.routeName, isNotEmpty);
-      print('Initial route path: ${navigatorObserver.currentRouteData?.routePath}');
+      print(
+        'Initial route path: ${navigatorObserver.currentRouteData?.routePath}',
+      );
     }, timeout: const Timeout(Duration(seconds: 10)));
 
-    testWidgets('Should track navigation between routes', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'Should track navigation between routes',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
 
-      // Save initial route data
-      final initialRouteId = navigatorObserver.currentRouteData?.routeSpanId;
-      final initialRouteData = navigatorObserver.currentRouteData;
+        // Save initial route data
+        final initialRouteId = navigatorObserver.currentRouteData?.routeSpanId;
+        final initialRouteData = navigatorObserver.currentRouteData;
 
-      // Use direct router navigation instead of tapping the button
-      print('Navigating to /second');
-      router.go('/second');
-      await tester.pumpAndSettle();
+        // Use direct router navigation instead of tapping the button
+        print('Navigating to /second');
+        router.go('/second');
+        await tester.pumpAndSettle();
 
-      // Print the current route for debugging
-      print('Current route path: ${navigatorObserver.currentRouteData?.routePath}');
-      print('Current route name: ${navigatorObserver.currentRouteData?.routeName}');
+        // Print the current route for debugging
+        print(
+          'Current route path: ${navigatorObserver.currentRouteData?.routePath}',
+        );
+        print(
+          'Current route name: ${navigatorObserver.currentRouteData?.routeName}',
+        );
 
-      // Verify second page is showing
-      expect(find.byKey(const Key('second_page')), findsOneWidget);
+        // Verify second page is showing
+        expect(find.byKey(const Key('second_page')), findsOneWidget);
 
-      // Route data should be updated
-      expect(navigatorObserver.currentRouteData?.routeSpanId, isNot(equals(initialRouteId)));
-      expect(navigatorObserver.currentRouteData?.routeName, isNot(equals(initialRouteData?.routeName)));
-      expect(navigatorObserver.currentRouteData?.routePath, contains('/second'));
+        // Route data should be updated
+        expect(
+          navigatorObserver.currentRouteData?.routeSpanId,
+          isNot(equals(initialRouteId)),
+        );
+        expect(
+          navigatorObserver.currentRouteData?.routeName,
+          isNot(equals(initialRouteData?.routeName)),
+        );
+        expect(
+          navigatorObserver.currentRouteData?.routePath,
+          contains('/second'),
+        );
 
-      // Save second route data
-      final secondRouteId = navigatorObserver.currentRouteData?.routeSpanId;
+        // Save second route data
+        final secondRouteId = navigatorObserver.currentRouteData?.routeSpanId;
 
-      // Navigate to third page with parameter
-      print('Navigating to /third/123');
-      router.go('/third/123');
-      await tester.pumpAndSettle();
+        // Navigate to third page with parameter
+        print('Navigating to /third/123');
+        router.go('/third/123');
+        await tester.pumpAndSettle();
 
-      // Verify third page is showing
-      expect(find.byKey(const Key('third_page')), findsOneWidget);
+        // Verify third page is showing
+        expect(find.byKey(const Key('third_page')), findsOneWidget);
 
-      // Route data should be updated again
-      expect(navigatorObserver.currentRouteData?.routeSpanId, isNot(equals(secondRouteId)));
-      expect(navigatorObserver.currentRouteData?.routeName, isNotEmpty);
-      expect(navigatorObserver.currentRouteData?.routePath, contains('/third/'));
+        // Route data should be updated again
+        expect(
+          navigatorObserver.currentRouteData?.routeSpanId,
+          isNot(equals(secondRouteId)),
+        );
+        expect(navigatorObserver.currentRouteData?.routeName, isNotEmpty);
+        expect(
+          navigatorObserver.currentRouteData?.routePath,
+          contains('/third/'),
+        );
 
-      // Navigate back to first page
-      print('Navigating to /');
-      router.go('/');
-      await tester.pumpAndSettle();
+        // Navigate back to first page
+        print('Navigating to /');
+        router.go('/');
+        await tester.pumpAndSettle();
 
-      // Verify first page is showing again
-      expect(find.byKey(const Key('first_page')), findsOneWidget);
+        // Verify first page is showing again
+        expect(find.byKey(const Key('first_page')), findsOneWidget);
 
-      // We should be back at first page
-      expect(navigatorObserver.currentRouteData?.routePath, contains('/'));
-    }, timeout: const Timeout(Duration(seconds: 10)));
+        // We should be back at first page
+        expect(navigatorObserver.currentRouteData?.routePath, contains('/'));
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
 
-    testWidgets('Should handle route replacements', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'Should handle route replacements',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
 
-      // Save initial route data
-      final initialRouteId = navigatorObserver.currentRouteData?.routeSpanId;
+        // Save initial route data
+        final initialRouteId = navigatorObserver.currentRouteData?.routeSpanId;
 
-      // Navigate to second page
-      router.go('/second');
-      await tester.pumpAndSettle();
+        // Navigate to second page
+        router.go('/second');
+        await tester.pumpAndSettle();
 
-      // Replace the current route with third page
-      router.replace('/third/456');
-      await tester.pumpAndSettle();
+        // Replace the current route with third page
+        router.replace('/third/456');
+        await tester.pumpAndSettle();
 
-      // Route data should be updated
-      expect(navigatorObserver.currentRouteData?.routeSpanId, isNot(equals(initialRouteId)));
-      expect(navigatorObserver.currentRouteData?.routeName, isNotEmpty);
-      expect(navigatorObserver.currentRouteData?.routePath, contains('/third/'));
-    }, timeout: const Timeout(Duration(seconds: 10)));
+        // Route data should be updated
+        expect(
+          navigatorObserver.currentRouteData?.routeSpanId,
+          isNot(equals(initialRouteId)),
+        );
+        expect(navigatorObserver.currentRouteData?.routeName, isNotEmpty);
+        expect(
+          navigatorObserver.currentRouteData?.routePath,
+          contains('/third/'),
+        );
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
 
-    testWidgets('Should handle subroutes correctly', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'Should handle subroutes correctly',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
 
-      // Navigate to second page
-      router.go('/second');
-      await tester.pumpAndSettle();
+        // Navigate to second page
+        router.go('/second');
+        await tester.pumpAndSettle();
 
-      // Save second route data
-      final secondRouteId = navigatorObserver.currentRouteData?.routeSpanId;
+        // Save second route data
+        final secondRouteId = navigatorObserver.currentRouteData?.routeSpanId;
 
-      // Navigate to second page's details subroute
-      router.go('/second/details');
-      await tester.pumpAndSettle();
+        // Navigate to second page's details subroute
+        router.go('/second/details');
+        await tester.pumpAndSettle();
 
-      // Print the current route for debugging
-      print('Subroute path: ${navigatorObserver.currentRouteData?.routePath}');
-      print('Subroute name: ${navigatorObserver.currentRouteData?.routeName}');
+        // Print the current route for debugging
+        print(
+          'Subroute path: ${navigatorObserver.currentRouteData?.routePath}',
+        );
+        print(
+          'Subroute name: ${navigatorObserver.currentRouteData?.routeName}',
+        );
 
-      // Verify details page is showing
-      expect(find.byKey(const Key('second_details_page')), findsOneWidget);
+        // Verify details page is showing
+        expect(find.byKey(const Key('second_details_page')), findsOneWidget);
 
-      // Route data should be updated and should contain subroute info
-      expect(navigatorObserver.currentRouteData?.routeSpanId, isNot(equals(secondRouteId)));
-      expect(navigatorObserver.currentRouteData?.routePath, contains('/second/details'));
+        // Route data should be updated and should contain subroute info
+        expect(
+          navigatorObserver.currentRouteData?.routeSpanId,
+          isNot(equals(secondRouteId)),
+        );
+        expect(
+          navigatorObserver.currentRouteData?.routePath,
+          contains('/second/details'),
+        );
 
-      // Navigate back to second page from subroute
-      router.go('/second');
-      await tester.pumpAndSettle();
+        // Navigate back to second page from subroute
+        router.go('/second');
+        await tester.pumpAndSettle();
 
-      // We should be back at second page
-      expect(navigatorObserver.currentRouteData?.routePath, equals('/second/details'));
-    }, timeout: const Timeout(Duration(seconds: 10)));
+        // We should be back at second page
+        expect(
+          navigatorObserver.currentRouteData?.routePath,
+          equals('/second/details'),
+        );
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
   });
 
   group('OTelNavigatorObserver with MaterialApp (non-GoRouter)', () {
@@ -323,77 +367,101 @@ void main() {
       await FlutterOTel.reset();
     });
 
-    testWidgets('Should track navigation with standard Navigator', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        initialRoute: '/',
-        navigatorObservers: [navigatorObserver],
-        routes: {
-          '/': (context) => Scaffold(
-                key: const Key('home_page'),
-                appBar: AppBar(title: const Text('Home')),
-                body: Center(
-                  child: ElevatedButton(
-                    key: const Key('go_to_details'),
-                    onPressed: () {
-                      print('Pushing named route /details');
-                      Navigator.pushNamed(context, '/details');
-                    },
-                    child: const Text('Go to Details'),
+    testWidgets(
+      'Should track navigation with standard Navigator',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            initialRoute: '/',
+            navigatorObservers: [navigatorObserver],
+            routes: {
+              '/':
+                  (context) => Scaffold(
+                    key: const Key('home_page'),
+                    appBar: AppBar(title: const Text('Home')),
+                    body: Center(
+                      child: ElevatedButton(
+                        key: const Key('go_to_details'),
+                        onPressed: () {
+                          print('Pushing named route /details');
+                          Navigator.pushNamed(context, '/details');
+                        },
+                        child: const Text('Go to Details'),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-          '/details': (context) => Scaffold(
-                key: const Key('details_page'),
-                appBar: AppBar(title: const Text('Details')),
-                body: Center(
-                  child: ElevatedButton(
-                    key: const Key('go_back'),
-                    onPressed: () {
-                      print('Popping to /');
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Go Back'),
+              '/details':
+                  (context) => Scaffold(
+                    key: const Key('details_page'),
+                    appBar: AppBar(title: const Text('Details')),
+                    body: Center(
+                      child: ElevatedButton(
+                        key: const Key('go_back'),
+                        onPressed: () {
+                          print('Popping to /');
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Go Back'),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-        },
-      ));
-      await tester.pumpAndSettle();
+            },
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      // Save initial route data
-      final initialRouteId = navigatorObserver.currentRouteData?.routeSpanId;
-      final initialRouteData = navigatorObserver.currentRouteData;
+        // Save initial route data
+        final initialRouteId = navigatorObserver.currentRouteData?.routeSpanId;
+        final initialRouteData = navigatorObserver.currentRouteData;
 
-      print('Initial route: ${initialRouteData?.routeName}');
+        print('Initial route: ${initialRouteData?.routeName}');
 
-      // Push route using Navigator instead of tapping button
-      await tester.tap(find.byKey(const Key('go_to_details')));
-      await tester.pumpAndSettle();
+        // Push route using Navigator instead of tapping button
+        await tester.tap(find.byKey(const Key('go_to_details')));
+        await tester.pumpAndSettle();
 
-      print('After navigation, route: ${navigatorObserver.currentRouteData?.routeName}');
-      print('After navigation, path: ${navigatorObserver.currentRouteData?.routePath}');
+        print(
+          'After navigation, route: ${navigatorObserver.currentRouteData?.routeName}',
+        );
+        print(
+          'After navigation, path: ${navigatorObserver.currentRouteData?.routePath}',
+        );
 
-      // Verify details page is showing
-      expect(find.byKey(const Key('details_page')), findsOneWidget);
+        // Verify details page is showing
+        expect(find.byKey(const Key('details_page')), findsOneWidget);
 
-      // Route data should be updated
-      expect(navigatorObserver.currentRouteData?.routeSpanId, isNot(equals(initialRouteId)));
-      expect(navigatorObserver.currentRouteData?.routeName, isNot(equals(initialRouteData?.routeName)));
-      expect(navigatorObserver.currentRouteData?.routePath, contains('details'));
+        // Route data should be updated
+        expect(
+          navigatorObserver.currentRouteData?.routeSpanId,
+          isNot(equals(initialRouteId)),
+        );
+        expect(
+          navigatorObserver.currentRouteData?.routeName,
+          isNot(equals(initialRouteData?.routeName)),
+        );
+        expect(
+          navigatorObserver.currentRouteData?.routePath,
+          contains('details'),
+        );
 
-      // Save details route data
-      final detailsRouteId = navigatorObserver.currentRouteData?.routeSpanId;
+        // Save details route data
+        final detailsRouteId = navigatorObserver.currentRouteData?.routeSpanId;
 
-      // Navigate back to home
-      await tester.tap(find.byKey(const Key('go_back')));
-      await tester.pumpAndSettle();
+        // Navigate back to home
+        await tester.tap(find.byKey(const Key('go_back')));
+        await tester.pumpAndSettle();
 
-      // Verify home page is showing again
-      expect(find.byKey(const Key('home_page')), findsOneWidget);
+        // Verify home page is showing again
+        expect(find.byKey(const Key('home_page')), findsOneWidget);
 
-      // We should be back at home
-      expect(navigatorObserver.currentRouteData?.routeSpanId, isNot(equals(detailsRouteId)));
-    }, timeout: const Timeout(Duration(seconds: 10)));
+        // We should be back at home
+        expect(
+          navigatorObserver.currentRouteData?.routeSpanId,
+          isNot(equals(detailsRouteId)),
+        );
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
   });
 
   group('OTelNavigatorObserver with Real Collector', () {
@@ -478,101 +546,110 @@ void main() {
       await FlutterOTel.reset();
     });
 
-    testWidgets('Should create spans for route changes', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
-      await FlutterOTel.tracerProvider.forceFlush();
+    testWidgets(
+      'Should create spans for route changes',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
+        await FlutterOTel.tracerProvider.forceFlush();
 
-      // Navigate to second page
-      router.go('/second');
-      await tester.pumpAndSettle();
-      await FlutterOTel.tracerProvider.forceFlush();
+        // Navigate to second page
+        router.go('/second');
+        await tester.pumpAndSettle();
+        await FlutterOTel.tracerProvider.forceFlush();
 
-      // Try to verify spans, but don't fail if they can't be verified
-      try {
-        // Wait for spans to be exported with a shorter timeout
-        await collector.waitForSpansWithTimeout(2); // Initial route + second page
+        // Try to verify spans, but don't fail if they can't be verified
+        try {
+          // Wait for spans to be exported with a shorter timeout
+          await collector.waitForSpansWithTimeout(
+            2,
+          ); // Initial route + second page
 
-        // Verify spans were created
-        await collector.assertSpanExists(
-          name: NavigationSemantics.navigationAction.key,
-          attributes: {
-            NavigationSemantics.navigationAction.key: NavigationAction.push.toString(),
-          }
-        );
-      } catch (e) {
-        print('WARNING: Unable to verify spans: $e');
-        // Don't fail the test, we're just testing the observer works
-      }
-    }, timeout: const Timeout(Duration(seconds: 10)));
+          // Verify spans were created
+          await collector.assertSpanExists(
+            name: NavigationSemantics.navigationAction.key,
+            attributes: {
+              NavigationSemantics.navigationAction.key:
+                  NavigationAction.push.toString(),
+            },
+          );
+        } catch (e) {
+          print('WARNING: Unable to verify spans: $e');
+          // Don't fail the test, we're just testing the observer works
+        }
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
 
-    testWidgets('Should create spans for subroute changes', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'Should create spans for subroute changes',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
 
-      // Go to second page
-      router.go('/second');
-      await tester.pumpAndSettle();
+        // Go to second page
+        router.go('/second');
+        await tester.pumpAndSettle();
 
-      // Go to details subroute
-      router.go('/second/details');
-      await tester.pumpAndSettle();
-      await FlutterOTel.tracerProvider.forceFlush();
+        // Go to details subroute
+        router.go('/second/details');
+        await tester.pumpAndSettle();
+        await FlutterOTel.tracerProvider.forceFlush();
 
-      // Try to verify spans, but don't fail if they can't be verified
-      try {
-        // Wait for spans to be exported with a shorter timeout
-        await collector.waitForSpansWithTimeout(3); // Initial route + second page + details page
+        // Try to verify spans, but don't fail if they can't be verified
+        try {
+          // Wait for spans to be exported with a shorter timeout
+          await collector.waitForSpansWithTimeout(
+            3,
+          ); // Initial route + second page + details page
 
-        // Verify spans were created for subroute navigation
-        await collector.assertSpanExists(
-          name: NavigationSemantics.navigationAction.key,
-          attributes: {
-            NavigationSemantics.routePath.key: '/second/details',
-          }
-        );
-      } catch (e) {
-        print('WARNING: Unable to verify spans: $e');
-        // Don't fail the test, we're just testing the observer works
-      }
-    }, timeout: const Timeout(Duration(seconds: 10)));
+          // Verify spans were created for subroute navigation
+          await collector.assertSpanExists(
+            name: NavigationSemantics.navigationAction.key,
+            attributes: {NavigationSemantics.routePath.key: '/second/details'},
+          );
+        } catch (e) {
+          print('WARNING: Unable to verify spans: $e');
+          // Don't fail the test, we're just testing the observer works
+        }
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
 
-    testWidgets('Should create spans for parametrized routes', (tester) async {
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: router,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'Should create spans for parametrized routes',
+      (tester) async {
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
 
-      // Go to second page
-      router.go('/second');
-      await tester.pumpAndSettle();
+        // Go to second page
+        router.go('/second');
+        await tester.pumpAndSettle();
 
-      // Go to third page with parameter
-      router.go('/third/123');
-      await tester.pumpAndSettle();
-      await FlutterOTel.tracerProvider.forceFlush();
+        // Go to third page with parameter
+        router.go('/third/123');
+        await tester.pumpAndSettle();
+        await FlutterOTel.tracerProvider.forceFlush();
 
-      // Try to verify spans, but don't fail if they can't be verified
-      try {
-        // Wait for spans to be exported with a shorter timeout
-        await collector.waitForSpansWithTimeout(3); // Initial route + second page + third page
+        // Try to verify spans, but don't fail if they can't be verified
+        try {
+          // Wait for spans to be exported with a shorter timeout
+          await collector.waitForSpansWithTimeout(
+            3,
+          ); // Initial route + second page + third page
 
-        // Verify spans were created with parameter info
-        await collector.assertSpanExists(
-          name: NavigationSemantics.navigationAction.key,
-          attributes: {
-            NavigationSemantics.routePath.key: '/third/123',
-          }
-        );
-      } catch (e) {
-        print('WARNING: Unable to verify spans: $e');
-        // Don't fail the test, we're just testing the observer works
-      }
-    }, timeout: const Timeout(Duration(seconds: 10)));
+          // Verify spans were created with parameter info
+          await collector.assertSpanExists(
+            name: NavigationSemantics.navigationAction.key,
+            attributes: {NavigationSemantics.routePath.key: '/third/123'},
+          );
+        } catch (e) {
+          print('WARNING: Unable to verify spans: $e');
+          // Don't fail the test, we're just testing the observer works
+        }
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
   });
 }
 

@@ -15,10 +15,12 @@ class OTelPerformanceOverlayWidget extends StatefulWidget {
   });
 
   @override
-  State<OTelPerformanceOverlayWidget> createState() => _OTelPerformanceOverlayWidgetState();
+  State<OTelPerformanceOverlayWidget> createState() =>
+      _OTelPerformanceOverlayWidgetState();
 }
 
-class _OTelPerformanceOverlayWidgetState extends State<OTelPerformanceOverlayWidget> {
+class _OTelPerformanceOverlayWidgetState
+    extends State<OTelPerformanceOverlayWidget> {
   late DateTime _buildStartTime;
 
   @override

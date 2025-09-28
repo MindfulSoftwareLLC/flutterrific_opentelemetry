@@ -349,5 +349,4 @@ class OTelMetricsBridge {
     // Record the layout shift score
     _getLayoutShiftHistogram().record(metric.shiftScore, attributes);
   }
-
 }
