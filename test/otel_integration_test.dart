@@ -718,23 +718,3 @@ void main() {
   });
 }
 
-// Helper method to parse attributes
-Map<String, dynamic> _parseAttributes(List? attrs) {
-  if (attrs == null) return {};
-  final result = <String, dynamic>{};
-  for (final attr in attrs) {
-    final key = attr['key'] as String;
-    final value = attr['value'] as Map<String, dynamic>;
-    // Handle different value types
-    if (value.containsKey('stringValue')) {
-      result[key] = value['stringValue'];
-    } else if (value.containsKey('intValue')) {
-      result[key] = value['intValue'];
-    } else if (value.containsKey('doubleValue')) {
-      result[key] = value['doubleValue'];
-    } else if (value.containsKey('boolValue')) {
-      result[key] = value['boolValue'];
-    }
-  }
-  return result;
-}

@@ -222,21 +222,24 @@ class FlutterOTel {
       );
       if (envEndpoint.isNotEmpty) {
         endpoint = envEndpoint;
-        if (OTelLog.isDebug())
+        if (OTelLog.isDebug()) {
           OTelLog.debug(
             'Using endpoint from OTEL_EXPORTER_OTLP_ENDPOINT: $endpoint',
           );
+        }
       } else if (dartasticApiKey != null && dartasticApiKey.isNotEmpty) {
         // dartastic key uses the dartastic endpoint
         endpoint = dartasticEndpoint;
-        if (OTelLog.isDebug())
+        if (OTelLog.isDebug()) {
           OTelLog.debug('Using default Dartastic endpoint : $endpoint');
+        }
       } else {
         endpoint = OTelFactory.defaultEndpoint;
-        if (OTelLog.isDebug())
+        if (OTelLog.isDebug()) {
           OTelLog.debug(
             'Using endpoint from OTelFactory.defaultEndpoint: $endpoint',
           );
+        }
       }
     }
 
@@ -255,8 +258,9 @@ class FlutterOTel {
       sdk.SpanExporter exporter;
       if (kIsWeb) {
         // Web platform must use HTTP
-        if (OTelLog.isDebug())
+        if (OTelLog.isDebug()) {
           OTelLog.debug('Creating HTTP span exporter for web platform');
+        }
         exporter = OtlpHttpSpanExporter(
           OtlpHttpExporterConfig(
             endpoint: endpoint,
@@ -265,8 +269,9 @@ class FlutterOTel {
         );
       } else {
         // Native platforms use gRPC
-        if (OTelLog.isDebug())
+        if (OTelLog.isDebug()) {
           OTelLog.debug('Creating gRPC span exporter for native platform');
+        }
         exporter = OtlpGrpcSpanExporter(
           OtlpGrpcExporterConfig(endpoint: endpoint, insecure: !secure),
         );
@@ -279,16 +284,18 @@ class FlutterOTel {
           maxExportBatchSize: 512,
         ),
       );
-      if (OTelLog.isDebug())
+      if (OTelLog.isDebug()) {
         OTelLog.debug('Created ${kIsWeb ? "HTTP" : "gRPC"} span processor');
+      }
     }
 
     // Create platform-specific metric exporters if not provided
     if (metricExporter == null) {
       if (kIsWeb) {
         // Web platform must use HTTP
-        if (OTelLog.isDebug())
+        if (OTelLog.isDebug()) {
           OTelLog.debug('Creating HTTP metric exporter for web platform');
+        }
         metricExporter = OtlpHttpMetricExporter(
           OtlpHttpMetricExporterConfig(
             endpoint: endpoint,
@@ -297,8 +304,9 @@ class FlutterOTel {
         );
       } else {
         // Native platforms use gRPC
-        if (OTelLog.isDebug())
+        if (OTelLog.isDebug()) {
           OTelLog.debug('Creating gRPC metric exporter for native platform');
+        }
         metricExporter = OtlpGrpcMetricExporter(
           OtlpGrpcMetricExporterConfig(endpoint: endpoint, insecure: !secure),
         );

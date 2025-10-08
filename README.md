@@ -97,14 +97,88 @@ The SDK automatically instruments:
 
 ## Platform Support
 
-| Platform | Support Level | Protocol | Notes |
-|----------|---------------|----------|-------|
-| Android  | Full         | OTLP/gRPC | Complete feature support |
-| iOS      | Full         | OTLP/gRPC | Complete feature support |
-| Web      | Full         | OTLP/HTTP | Auto-switches due to browser limitations |
-| Windows  | Beta         | OTLP/gRPC | Desktop support |
-| macOS    | Beta         | OTLP/gRPC | Desktop support |
-| Linux    | Beta         | OTLP/gRPC | Desktop support |
+| Platform | Support Level | Protocol  | Notes                                    |
+|----------|---------------|-----------|------------------------------------------|
+| Android  | Full          | OTLP/gRPC | Complete feature support                 |
+| iOS      | Full          | OTLP/gRPC | Complete feature support                 |
+| Web      | Full          | OTLP/HTTP | Auto-switches due to browser limitations |
+| Windows  | Beta          | OTLP/gRPC | Desktop support                          |
+| macOS    | Beta          | OTLP/gRPC | Desktop support                          |
+| Linux    | Beta          | OTLP/gRPC | Desktop support                          |
+
+## Environment Variables
+
+Dartastic OpenTelemetry supports standard OpenTelemetry environment variables as defined in the [OpenTelemetry Specification](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/).
+
+These environment variables can be set to configure the SDK behavior without changing code. Signal-specific variables take precedence over general ones.
+
+### Service Configuration
+
+| Variable                   | Description                                                       | Example                                 |
+|----------------------------|-------------------------------------------------------------------|-----------------------------------------|
+| `OTEL_SERVICE_NAME`        | Sets the service name                                             | `my-dart-app`                           |
+| `OTEL_SERVICE_VERSION`     | Sets the service version                                          | `1.0.0`                                 |
+| `OTEL_RESOURCE_ATTRIBUTES` | Additional resource attributes as comma-separated key=value pairs | `environment=production,region=us-west` |
+
+### OTLP Exporter Configuration
+
+| Variable                         | Description                                           | Default                                                            | Example                              |
+|----------------------------------|-------------------------------------------------------|--------------------------------------------------------------------|--------------------------------------|
+| `OTEL_EXPORTER_OTLP_ENDPOINT`    | The OTLP endpoint URL                                 | `http://localhost:4317` for gRPC, `http://localhost:4318` for HTTP | `https://otel-collector:4317`        |
+| `OTEL_EXPORTER_OTLP_PROTOCOL`    | The protocol to use                                   | `http/protobuf`                                                    | `grpc`, `http/protobuf`, `http/json` |
+| `OTEL_EXPORTER_OTLP_HEADERS`     | Additional headers as comma-separated key=value pairs | None                                                               | `api-key=secret,tenant=acme`         |
+| `OTEL_EXPORTER_OTLP_INSECURE`    | Whether to use insecure connection                    | `false`                                                            | `true`                               |
+| `OTEL_EXPORTER_OTLP_TIMEOUT`     | Export timeout in milliseconds                        | `10000`                                                            | `5000`                               |
+| `OTEL_EXPORTER_OTLP_COMPRESSION` | Compression to use                                    | None                                                               | `gzip`                               |
+
+### Signal-Specific Configuration
+
+#### Traces
+
+| Variable                                | Description                      | Default                  | Example                      |
+|-----------------------------------------|----------------------------------|--------------------------|------------------------------|
+| `OTEL_TRACES_EXPORTER`                  | Trace exporter to use            | `otlp`                   | `console`, `none`            |
+| `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`    | Traces-specific endpoint         | Uses general endpoint    | `https://traces.example.com` |
+| `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL`    | Traces-specific protocol         | Uses general protocol    | `grpc`                       |
+| `OTEL_EXPORTER_OTLP_TRACES_HEADERS`     | Traces-specific headers          | Uses general headers     | `trace-key=value`            |
+| `OTEL_EXPORTER_OTLP_TRACES_INSECURE`    | Traces-specific insecure setting | Uses general setting     | `true`                       |
+| `OTEL_EXPORTER_OTLP_TRACES_TIMEOUT`     | Traces-specific timeout          | Uses general timeout     | `30000`                      |
+| `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION` | Traces-specific compression      | Uses general compression | `gzip`                       |
+
+#### Metrics
+
+| Variable                                 | Description                       | Default                  | Example                       |
+|------------------------------------------|-----------------------------------|--------------------------|-------------------------------|
+| `OTEL_METRICS_EXPORTER`                  | Metrics exporter to use           | `otlp`                   | `console`, `none`             |
+| `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT`    | Metrics-specific endpoint         | Uses general endpoint    | `https://metrics.example.com` |
+| `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL`    | Metrics-specific protocol         | Uses general protocol    | `http/protobuf`               |
+| `OTEL_EXPORTER_OTLP_METRICS_HEADERS`     | Metrics-specific headers          | Uses general headers     | `metric-key=value`            |
+| `OTEL_EXPORTER_OTLP_METRICS_INSECURE`    | Metrics-specific insecure setting | Uses general setting     | `false`                       |
+| `OTEL_EXPORTER_OTLP_METRICS_TIMEOUT`     | Metrics-specific timeout          | Uses general timeout     | `60000`                       |
+| `OTEL_EXPORTER_OTLP_METRICS_COMPRESSION` | Metrics-specific compression      | Uses general compression | `gzip`                        |
+
+### Logging Configuration
+
+| Variable                | Description                        | Example                                            |
+|-------------------------|------------------------------------|----------------------------------------------------|
+| `OTEL_LOG_LEVEL`        | SDK internal log level             | `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL` |
+| `OTEL_LOG_METRICS`      | Enable metrics logging             | `true`, `1`, `yes`, `on`                           |
+| `OTEL_LOG_SPANS`        | Enable spans logging               | `true`, `1`, `yes`, `on`                           |
+| `OTEL_LOG_EXPORT`       | Enable export logging              | `true`, `1`, `yes`, `on`                           |
+| `OTEL_CONSOLE_EXPORTER` | Add console exporter for debugging | `true`, `1`, `yes`, `on`                           |
+
+### Usage Example with Flutter
+
+When running a Flutter app:
+
+```bash
+flutter run \
+  --dart-define=OTEL_SERVICE_NAME=my-flutter-app \
+  --dart-define=OTEL_SERVICE_VERSION=1.0.0 \
+  --dart-define=OTEL_EXPORTER_OTLP_ENDPOINT=https://otel-collector:4317 \
+  --dart-define=OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+  --dart-define=OTEL_EXPORTER_OTLP_HEADERS=api-key=your-api-key
+```
 
 ## Advanced Usage
 

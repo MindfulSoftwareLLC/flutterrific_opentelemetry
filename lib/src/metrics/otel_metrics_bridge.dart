@@ -31,6 +31,7 @@ class OTelMetricsBridge {
   Histogram<double>? _interactionTimeHistogram;
   Histogram<double>? _paintTimeHistogram;
   Histogram<double>? _layoutShiftHistogram;
+  // ignore: unused_field
   ObservableGauge<double>? _apdexScoreGauge;
 
   /// Initialize the metrics bridge by subscribing to metrics streams

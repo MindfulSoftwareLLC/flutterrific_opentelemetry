@@ -32,9 +32,6 @@ class OTelGoRouterRedirect {
     BuildContext context,
     GoRouterState state,
   ) async {
-    // Extract the current path from the GoRouter state.
-    final String currentPath = state.uri.path;
-
     // Here you can insert any OTel instrumentation code,
     // e.g., record a span or log the current route.
     // For example:

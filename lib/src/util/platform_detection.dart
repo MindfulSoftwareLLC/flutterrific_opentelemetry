@@ -42,17 +42,20 @@ class PlatformDetection {
     if (envProtocol.isNotEmpty) {
       if (envProtocol.toLowerCase() == 'http/protobuf') {
         useHttp = true;
-        if (OTelLog.isDebug())
+        if (OTelLog.isDebug()) {
           OTelLog.debug('Using HTTP/protobuf protocol as configured');
+        }
       } else if (envProtocol.toLowerCase() == 'grpc') {
         useHttp = false;
-        if (OTelLog.isDebug())
+        if (OTelLog.isDebug()) {
           OTelLog.debug('Using gRPC protocol as configured');
+        }
       } else {
-        if (OTelLog.isWarn())
+        if (OTelLog.isWarn()) {
           OTelLog.warn(
             'Unknown OTEL_EXPORTER_OTLP_PROTOCOL: $envProtocol, defaulting to ${useHttp ? "HTTP/protobuf" : "gRPC"}',
           );
+        }
       }
     }
 
@@ -74,10 +77,11 @@ class PlatformDetection {
         httpEndpoint = httpEndpoint.replaceAll(':4317', ':4318');
       }
 
-      if (OTelLog.isDebug())
+      if (OTelLog.isDebug()) {
         OTelLog.debug(
           'Creating OtlpHttpSpanExporter with endpoint: $httpEndpoint',
         );
+      }
       return OtlpHttpSpanExporter(
         OtlpHttpExporterConfig(
           endpoint: httpEndpoint,
@@ -97,10 +101,11 @@ class PlatformDetection {
         insecure = insecure || !isSecure;
       }
 
-      if (OTelLog.isDebug())
+      if (OTelLog.isDebug()) {
         OTelLog.debug(
           'Creating OtlpGrpcSpanExporter with endpoint: $grpcEndpoint, insecure: $insecure',
         );
+      }
       return OtlpGrpcSpanExporter(
         OtlpGrpcExporterConfig(endpoint: grpcEndpoint, insecure: insecure),
       );
@@ -142,19 +147,22 @@ class PlatformDetection {
     if (envProtocol.isNotEmpty) {
       if (envProtocol.toLowerCase() == 'http/protobuf') {
         useHttp = true;
-        if (OTelLog.isDebug())
+        if (OTelLog.isDebug()) {
           OTelLog.debug(
             'Using HTTP/protobuf protocol for metrics as configured',
           );
+        }
       } else if (envProtocol.toLowerCase() == 'grpc') {
         useHttp = false;
-        if (OTelLog.isDebug())
+        if (OTelLog.isDebug()) {
           OTelLog.debug('Using gRPC protocol for metrics as configured');
+        }
       } else {
-        if (OTelLog.isWarn())
+        if (OTelLog.isWarn()) {
           OTelLog.warn(
             'Unknown OTEL_EXPORTER_OTLP_PROTOCOL: $envProtocol, defaulting to ${useHttp ? "HTTP/protobuf" : "gRPC"} for metrics',
           );
+        }
       }
     }
 
@@ -176,10 +184,11 @@ class PlatformDetection {
         httpEndpoint = httpEndpoint.replaceAll(':4317', ':4318');
       }
 
-      if (OTelLog.isDebug())
+      if (OTelLog.isDebug()) {
         OTelLog.debug(
           'Creating OtlpHttpMetricExporter with endpoint: $httpEndpoint',
         );
+      }
       return OtlpHttpMetricExporter(
         OtlpHttpMetricExporterConfig(
           endpoint: httpEndpoint,
@@ -199,10 +208,11 @@ class PlatformDetection {
         insecure = insecure || !isSecure;
       }
 
-      if (OTelLog.isDebug())
+      if (OTelLog.isDebug()) {
         OTelLog.debug(
           'Creating OtlpGrpcMetricExporter with endpoint: $grpcEndpoint, insecure: $insecure',
         );
+      }
       return OtlpGrpcMetricExporter(
         OtlpGrpcMetricExporterConfig(
           endpoint: grpcEndpoint,

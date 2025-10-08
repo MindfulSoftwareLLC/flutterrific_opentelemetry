@@ -40,7 +40,6 @@ class MetricsService {
   // Utility method to check if metrics are flowing
   static void debugPrintMetricsStatus() {
     final reporter = FlutterMetricReporter();
-    final console = ConsoleMetricsListener();
 
     if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric("Metrics debug status check");

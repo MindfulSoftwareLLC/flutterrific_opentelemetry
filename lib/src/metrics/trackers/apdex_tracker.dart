@@ -116,7 +116,6 @@ class ApdexTracker {
 
     // Filter responses within the specified period
     final now = DateTime.now();
-    final periodStart = now.subtract(period ?? _reportingPeriod);
 
     var satisfied = 0;
     var tolerating = 0;

@@ -61,6 +61,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('OTelLifecycleObserver with Mocked Tracer', () {
+    // ignore: unused_local_variable
     late OTelLifecycleObserver lifecycleObserver;
 
     setUp(() async {

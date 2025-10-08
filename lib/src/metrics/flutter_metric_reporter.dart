@@ -118,8 +118,9 @@ class FlutterMetricReporter extends NavigatorObserver {
   factory FlutterMetricReporter() => _instance;
 
   FlutterMetricReporter._internal() {
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric('FlutterMetricReporter: Initializing...');
+    }
   }
 
   // Default Apdex score for the application
@@ -191,10 +192,11 @@ class FlutterMetricReporter extends NavigatorObserver {
     String? transitionType,
     Map<String, dynamic>? attributes,
   }) {
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric(
         'FlutterMetricReporter: Reporting page load: $pageName',
       );
+    }
     _pageLoadController.add(
       PageLoadMetric(
         pageName: pageName,
@@ -210,8 +212,9 @@ class FlutterMetricReporter extends NavigatorObserver {
     StackTrace? stackTrace,
     Map<String, dynamic>? attributes,
   }) {
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric('FlutterMetricReporter: Reporting error: $error');
+    }
     _errorController.add(
       ErrorMetric(error: error, stackTrace: stackTrace, attributes: attributes),
     );
@@ -227,16 +230,18 @@ class FlutterMetricReporter extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric(
         'FlutterMetricReporter: didPush - attempting to get route name',
       );
+    }
     super.didPush(route, previousRoute);
     final routeName = _getRouteName(route);
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric(
         'FlutterMetricReporter: didPush with route name: $routeName',
       );
+    }
     if (routeName != null) {
       final startTime = DateTime.now();
       // Report initial page load metric
@@ -267,10 +272,11 @@ class FlutterMetricReporter extends NavigatorObserver {
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     final routeName = _getRouteName(previousRoute);
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric(
         'FlutterMetricReporter: didPop with route name: $routeName',
       );
+    }
     super.didPop(route, previousRoute);
     if (routeName != null) {
       final startTime = DateTime.now();
@@ -302,10 +308,11 @@ class FlutterMetricReporter extends NavigatorObserver {
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
     final routeName = _getRouteName(newRoute);
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric(
         'FlutterMetricReporter: didReplace with route name: $routeName',
       );
+    }
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     if (routeName != null) {
       final startTime = DateTime.now();
@@ -335,10 +342,11 @@ class FlutterMetricReporter extends NavigatorObserver {
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     final routeName = _getRouteName(previousRoute);
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric(
         'FlutterMetricReporter: didRemove with route name: $routeName',
       );
+    }
     super.didRemove(route, previousRoute);
     _trackNavigation('remove', previousRoute, route);
   }
@@ -350,10 +358,11 @@ class FlutterMetricReporter extends NavigatorObserver {
   ) {
     final toRouteName = _getRouteName(toRoute);
     final fromRouteName = _getRouteName(fromRoute);
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric(
         'FlutterMetricReporter: Tracking navigation: $type from $fromRouteName to $toRouteName',
       );
+    }
 
     if (toRouteName != null || fromRouteName != null) {
       _navigationController.add(
@@ -372,10 +381,11 @@ class FlutterMetricReporter extends NavigatorObserver {
     Duration? responseTime,
     Map<String, dynamic>? attributes,
   }) {
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric(
         'FlutterMetricReporter: Reporting user interaction: $screenName - $actionType',
       );
+    }
     _interactionController.add(
       UserInteractionMetric(
         screenName: screenName,
@@ -392,10 +402,11 @@ class FlutterMetricReporter extends NavigatorObserver {
     String paintType, {
     Map<String, dynamic>? attributes,
   }) {
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric(
         'FlutterMetricReporter: Reporting paint: $componentName - $paintType',
       );
+    }
     _paintController.add(
       PaintMetric(
         componentName: componentName,
@@ -412,10 +423,11 @@ class FlutterMetricReporter extends NavigatorObserver {
     String? cause,
     Map<String, dynamic>? attributes,
   }) {
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric(
         'FlutterMetricReporter: Reporting layout shift: $componentName',
       );
+    }
     _layoutShiftController.add(
       LayoutShiftMetric(
         componentName: componentName,
@@ -427,8 +439,9 @@ class FlutterMetricReporter extends NavigatorObserver {
   }
 
   void dispose() {
-    if (OTelLog.isLogMetrics())
+    if (OTelLog.isLogMetrics()) {
       OTelLog.logMetric('FlutterMetricReporter: Disposing...');
+    }
     _performanceController.close();
     _pageLoadController.close();
     _errorController.close();
