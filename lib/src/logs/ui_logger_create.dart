@@ -5,7 +5,7 @@ part of 'ui_logger.dart';
 
 /// Factory for creating [UILogger] instances.
 class UILoggerCreate {
-  static UILogger create({required Logger delegate}) {
+  static UILogger create({required OTelLogger delegate}) {
     return UILogger._(delegate: delegate);
   }
 }

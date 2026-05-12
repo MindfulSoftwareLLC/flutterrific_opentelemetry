@@ -4,6 +4,64 @@
 
 The Flutterrific OpenTelemetry SDK is in active development, building upon the robust foundation of the Dartastic OpenTelemetry SDK to provide Flutter-specific observability capabilities.
 
+## Path to 1.0 (stable)
+
+The path from the current `0.5.0-wip` to a stable `1.0.0` has two
+load-bearing gates beyond feature work, both tracked here so the
+release readiness story stays honest:
+
+### Test coverage gate (>=85% line coverage)
+
+Coverage today (per `tool/coverage.sh`): **~19%**. The structural
+challenge is that Flutterrific's auto-instrumentation (lifecycle
+observers, paint/shift trackers, gesture observers, navigator
+observers) exercises Flutter binding state that traditional `dart
+test` can't easily fake. Plan:
+
+- [ ] **0.5.x** — bring pure-Dart units (semantic enums, factory
+      wiring, UI tracer/provider/logger delegation) to 80%+. These
+      are the easy wins and the units most prone to silent regression
+      during SDK bumps.
+- [ ] **0.6.x** — add Flutter widget tests that exercise the
+      observers against a `WidgetsApp` test harness. `OTelLifecycleObserver`,
+      `OTelNavigatorObserver`, and `OTelInteractionTracker` all need
+      this; the metric trackers (`PaintTracker`, `ShiftTracker`,
+      `InputTracker`) need their own.
+- [ ] **0.7.x** — integration tests against a real OTLP collector
+      (the Grafana LGTM Docker image is the reference target — see
+      [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md)). Covers
+      export paths and platform-specific exporter selection.
+
+### Client OpenTelemetry alignment gate
+
+The OTel client / browser / mobile semantic conventions are still
+`Status: Development` (see the README "Client OpenTelemetry" section
+for the comparison). Stabilizing Flutterrific's API requires
+adopting the spec'd event names and attribute keys as they
+stabilize, then deprecating Flutterrific's RUM-style stand-ins. Plan:
+
+- [ ] **0.5.x** — emit `device.app.lifecycle` events with both the
+      Flutterrific-native state values AND a `device.lifecycle.state`
+      attribute carrying the closest Android/iOS equivalent so users
+      can filter on either while the spec settles.
+- [ ] **0.6.x** — migrate `withOTelButtonTracking` / interaction
+      paths to emit `app.widget.click` / `app.screen.click` events
+      alongside (or in place of) the current `interaction.*` span. If
+      the spec lands cleanly, deprecate `InteractionSemantics` in
+      0.7.
+- [ ] **0.6.x** — migrate `app.jank` for Flutter frame drops; align
+      `PerformanceSemantics.frameTime` / `jankCount` with the
+      `app.jank` body fields once the spec PR lands.
+- [ ] **0.7.x** — emit `browser.web_vital` events on web targets
+      when the underlying browser APIs make CLS/FID/INP/LCP
+      available. Best done against a Flutter web `flutter_web_plugins`
+      bridge.
+- [ ] **1.0** — drop or rename the remaining Flutterrific-specific
+      RUM enums that have spec equivalents. Items without spec
+      equivalents (navigation, RUM view durations, error widget
+      context) keep their `Flutter*` / `Rum*` prefix to make the
+      Flutterrific-only status explicit.
+
 ## Short-Term Goals (0.x releases)
 
 ### Core Flutter Integration

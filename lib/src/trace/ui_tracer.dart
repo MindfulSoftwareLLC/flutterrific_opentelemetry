@@ -58,6 +58,15 @@ class UITracer implements sdk.Tracer {
   @override
   sdk.Resource? get resource => _provider.resource;
 
+  // Added in SDK 1.1.0-beta.2 — the underlying [APITracer.timeProvider]
+  // is the clock used for span start, end, and event timestamps. The
+  // SDK auto-selects `WebTimeProvider` on web targets (sub-ms via
+  // `window.performance.now()`) and `SystemTimeProvider` on native;
+  // we just delegate so Flutterrific picks up the platform-aware
+  // default without surfacing the abstraction in its public API.
+  @override
+  TimeProvider get timeProvider => _delegate.timeProvider;
+
   UISpan createUISpan({
     required String name,
     UISpanType? uiSpanType,
@@ -384,35 +393,13 @@ class UITracer implements sdk.Tracer {
   @override
   api.APISpan? get currentSpan => _delegate.currentSpan;
 
-  @override
-  T recordSpan<T>({
-    required String name,
-    required T Function() fn,
-    SpanKind kind = SpanKind.internal,
-    Attributes? attributes,
-  }) {
-    return _delegate.recordSpan(
-      name: name,
-      fn: fn,
-      kind: kind,
-      attributes: attributes,
-    );
-  }
-
-  @override
-  Future<T> recordSpanAsync<T>({
-    required String name,
-    required Future<T> Function() fn,
-    SpanKind kind = SpanKind.internal,
-    Attributes? attributes,
-  }) {
-    return _delegate.recordSpanAsync(
-      name: name,
-      fn: fn,
-      kind: kind,
-      attributes: attributes,
-    );
-  }
+  // `recordSpan` and `recordSpanAsync` were removed from the SDK in
+  // 0.8.3 — they were redundant with `startActiveSpan` / `startActiveSpanAsync`
+  // (which expose the span to `fn`) and the name was ambiguous
+  // ("record what?"). Callers that previously did
+  // `tracer.recordSpan(name: x, fn: f)` should now use
+  // `tracer.startActiveSpan(name: x, fn: (_) => f())` (the underscore
+  // discards the span argument if `f` doesn't need it).
 
   @override
   T startActiveSpan<T>({
@@ -444,20 +431,11 @@ class UITracer implements sdk.Tracer {
     );
   }
 
-  @override
-  api.APISpan startSpanWithContext({
-    required String name,
-    required Context context,
-    SpanKind kind = SpanKind.internal,
-    Attributes? attributes,
-  }) {
-    return _delegate.startSpanWithContext(
-      name: name,
-      context: context,
-      kind: kind,
-      attributes: attributes,
-    );
-  }
+  // `startSpanWithContext` was removed in `dartastic_opentelemetry`
+  // 1.1.0-beta.5 (deprecated since 1.1.0-beta). Migration: call
+  // `tracer.startSpan(name, context: ctx, kind: ..., attributes: ...)`
+  // directly, then wrap the work with `tracer.withSpan` /
+  // `withSpanAsync` to activate the span for a scope.
 
   @override
   T withSpan<T>(api.APISpan span, T Function() fn) {

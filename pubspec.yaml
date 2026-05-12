@@ -1,6 +1,6 @@
 name: flutterrific_opentelemetry
 description: "A Flutter package for OpenTelemetry based on dartastic_opentelemetry"
-version: 0.4.0
+version: 0.5.0-wip
 publisher: mindfulsoftware.com
 homepage: https://dartastic.io
 repository: https://github.com/MindfulSoftwareLLC/flutterrific_opentelemetry.git
@@ -12,8 +12,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  dartastic_opentelemetry: ^1.0.1-alpha
-  dartastic_opentelemetry_api: ^1.0.0-alpha
+  dartastic_opentelemetry: ^1.1.0-beta.4
+  dartastic_opentelemetry_api: ^1.0.0-beta.6
   #TODO - need to manage go_router dependency versions and no-go-router implementation
   go_router: ^14.8.1
   meta: ^1.16.0
@@ -26,3 +26,16 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   mockito: ^5.5.1
   build_runner: ^2.4.15
+  # For `tool/release.dart` — read pubspec.yaml via a typed Pubspec and
+  # validate the version is real semver before touching anything. Same
+  # dependency the SDK's release.dart uses.
+  pub_semver: ^2.1.0
+  pubspec_parse: ^1.5.0
+
+# Local override for the in-flight SDK `1.1.0-beta.5-wip` work — picks
+# up the `startSpanWithContext` removal that the override above
+# depends on (the published `1.1.0-beta.4` still has the method).
+# Remove this block before publishing once the SDK releases `beta.5`.
+dependency_overrides:
+  dartastic_opentelemetry:
+    path: ../dartastic_opentelemetry

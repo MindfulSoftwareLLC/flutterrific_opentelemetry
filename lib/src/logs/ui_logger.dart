@@ -29,10 +29,10 @@ part 'ui_logger_create.dart';
 /// logger.emitEvent('user.action', body: 'Button tapped',
 ///   attributes: {'button.id': 'submit'}.toAttributes());
 /// ```
-class UILogger implements Logger {
-  final Logger _delegate;
+class UILogger implements OTelLogger {
+  final OTelLogger _delegate;
 
-  UILogger._({required Logger delegate}) : _delegate = delegate;
+  UILogger._({required OTelLogger delegate}) : _delegate = delegate;
 
   // -- Delegate standard Logger interface --
 

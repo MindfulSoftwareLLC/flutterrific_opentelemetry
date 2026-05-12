@@ -3,6 +3,7 @@
 
 library;
 
+export 'src/util/otel_config.dart';
 export 'src/util/platform_detection.dart';
 
 export 'src/flutterrific_otel.dart';
@@ -71,7 +72,7 @@ export 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart'
         Tracer,
         TraceIdRatioSampler,
         // Logs
-        Logger,
+        OTelLogger,
         LoggerProvider,
         LogRecordProcessor,
         LogRecordExporter,
@@ -89,7 +90,19 @@ export 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart'
         LogsConfiguration,
         NavigationAction;
 
-/// Re-export key OpenTelemetry API components for convenience
+/// Re-export key OpenTelemetry API components for convenience.
+///
+/// As of `dartastic_opentelemetry_api` 1.0.0-beta.6, ~60 attribute-key
+/// enums dropped the `Resource` suffix to match the OTel semconv
+/// registry names (e.g. `HttpResource` → `Http`, `UrlResource` →
+/// `Url`). Six enums kept the suffix to avoid conflicts with common
+/// Dart / Flutter / library types: `ErrorResource`, `ExceptionResource`,
+/// `FileResource`, `ProcessResource`, `ServerResource`, `EventResource`.
+/// `UserSemantics` was renamed to `User`; `SessionViewSemantics` was
+/// split into `Session` (OTel-spec keys: `session.id`,
+/// `session.previous_id`) and `RumSessionView` (Datadog/Dynatrace-style
+/// `view.*` and underscore-variant keys). See the API beta.6 CHANGELOG
+/// for the full migration table.
 export 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart'
     show
         AppInfoSemantics,
@@ -98,56 +111,57 @@ export 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart'
         Baggage,
         BaggageEntry,
         BatterySemantics,
-        ClientResource,
-        CloudResource,
-        ComputeUnitResource,
-        ComputeInstanceResource,
+        Client,
+        Cloud,
+        ComputeUnit,
+        ComputeInstance,
         Context,
         ContextKey,
-        DatabaseResource,
-        DeploymentResource,
-        DeviceResource,
+        Database,
+        Deployment,
+        Device,
         DeviceSemantics,
         IdGenerator,
-        EnvironmentResource,
+        Environment,
         ErrorResource,
         ErrorSemantics,
         ExceptionResource,
-        FeatureFlagResource,
+        FeatureFlag,
         FileResource,
-        LogLevel,
-        GenAIResource,
-        GeneralResourceResource,
-        GraphQLResource,
-        HostResource,
-        HttpResource,
-        KubernetesResource,
+        GenAI,
+        General,
+        GraphQL,
+        Host,
+        Http,
+        Kubernetes,
         Measurement,
-        MessagingResource,
-        NetworkResource,
+        Messaging,
+        Network,
         OTelLog,
         ObservableCallback,
-        OperatingSystemResource,
+        OperatingSystem,
         ProcessResource,
-        RPCResource,
-        ServiceResource,
-        SourceCodeResource,
+        RPC,
+        Service,
+        SourceCode,
         SpanContext,
         SpanEvent,
         SpanLink,
         SpanId,
         SpanKind,
         SpanStatusCode,
-        TelemetryDistroResource,
-        TelemetrySDKResource,
+        TelemetryDistro,
+        TelemetrySDK,
         Timestamp,
         TraceId,
         TraceFlags,
         TraceState,
         Severity,
         LogRecord,
-        UserSemantics,
-        VersionResource,
+        Url,
+        // `User` replaces `UserSemantics` (beta.6 rename).
+        User,
+        Version,
         // UI Semantics
         AppLifecycleSemantics,
         AppLifecycleStates,
@@ -157,4 +171,8 @@ export 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart'
         NavigationSemantics,
         NetworkSemantics,
         PerformanceSemantics,
-        SessionViewSemantics;
+        // `SessionViewSemantics` split: OTel-spec keys live on
+        // `Session`; the Datadog/Dynatrace-style RUM keys
+        // (`view.name`, `view.start`, etc.) live on `RumSessionView`.
+        Session,
+        RumSessionView;

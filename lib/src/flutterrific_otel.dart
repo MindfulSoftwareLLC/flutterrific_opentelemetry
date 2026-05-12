@@ -19,7 +19,6 @@ import 'package:flutterrific_opentelemetry/src/semantics/flutter_semantics.dart'
 import 'package:flutterrific_opentelemetry/src/trace/interaction_tracker.dart';
 import 'package:flutterrific_opentelemetry/src/trace/ui_tracer.dart';
 import 'package:flutterrific_opentelemetry/src/trace/ui_tracer_provider.dart';
-import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 import 'package:uuid/uuid.dart';
 
 import 'metrics/metrics_service.dart';
@@ -510,7 +509,7 @@ class FlutterOTel {
       kind: SpanKind.client,
       attributes:
           {
-            SessionViewSemantics.viewName.key: screenName,
+            RumSessionView.viewName.key: screenName,
             FlutterUISemantics.uiType.key: 'screen',
           }.toAttributes(),
     );
@@ -542,7 +541,7 @@ class FlutterOTel {
 
     // Create interaction attributes
     final interactionAttributes = <String, Object>{
-      SessionViewSemantics.viewName.key: screenName,
+      RumSessionView.viewName.key: screenName,
       InteractionSemantics.interactionType.key: interactionType,
       if (targetName != null)
         InteractionSemantics.interactionTarget.key: targetName,
