@@ -5,16 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:flutterrific_opentelemetry/flutterrific_opentelemetry.dart';
 
 void main() {
-  /// This is a minimal demo, for a full demo see
-  /// wondrous_opentelemetry
-  String appName = 'flutterrific_example_app';
+  /// This is a minimal demo. For a full one, see `wondrous_opentelemetry`.
+  ///
+  /// Initialization sets up:
+  /// - Service identity (`serviceName`, optional `tracerName`).
+  /// - Auto-instrumentation for app lifecycle, navigation, and user
+  ///   interactions (opt out per signal via `enableAutoLogEvents: false`
+  ///   etc. on `FlutterOTel.initialize`).
+  /// - Platform resource detection (OS, device, app metadata).
+  /// - OTel `Resource` attributes that flow into every span and log.
+  const appName = 'flutterrific_example_app';
   FlutterOTel.initialize(
-    //the 'service' for Flutter is the client
+    // The "service" for a Flutter client is the app itself.
     serviceName: appName,
-    // the deafult tracer is the app-ui
-    // You can use OTel to create other tracers for different
-    // parts of the app, for repositories or services, etc.
-    // or use one tracer for the whole app.
+    // Default tracer is `app-ui`. Add additional tracers via
+    // `OTel.tracerProvider().getTracer('repositories')`, etc., when you
+    // want to separate spans by component.
     tracerName: '$appName-ui',
   );
   runApp(const MyApp());
@@ -32,7 +38,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'FlutterrificOTel Demo Home'),
-      // Add OpenTelemetry with just one line!
+      // For navigation tracing across screens, add
+      // `navigatorObservers: [FlutterOTel.routeObserver]` here (or pass
+      // the same observer to `GoRouter(observers: ...)`).
     );
   }
 }
@@ -51,7 +59,10 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isLoading = false;
 
   void _incrementCounter() {
-    // You can manually track interactions
+    // Manual interaction tracking. The `withOTelButtonTracking`
+    // extension (used on the network-request button below) is the
+    // ergonomic way; this raw form is useful when you need to attach
+    // extra context.
     FlutterOTel.interactionTracker.trackButtonClick(
       context,
       'increment_button',
@@ -67,36 +78,62 @@ class _MyHomePageState extends State<MyHomePage> {
       _isLoading = true;
     });
 
-    // Example of manually creating a span for a specific operation
+    // Example of manually creating a client span for an HTTP-style
+    // operation. Attributes use the OTel semantic-convention typed
+    // enums via `attributesFromSemanticMap` — the shorthand that drops
+    // the `.key` suffix on every entry. Mixing different semconv
+    // namespaces in one map is fine; every semconv enum implements
+    // `OTelSemantic`.
+    //
+    // The span is wrapped with `tracer.withSpanAsync` so it is
+    // *active* across every `await` inside the closure — any nested
+    // instrumentation that reads `Context.current.span` (e.g. another
+    // library that auto-attaches HTTP child spans) will correctly
+    // find this span as its parent. `withSpanAsync` uses Zone-based
+    // context propagation, which is the Dart-idiomatic way to carry
+    // a value across async boundaries.
     final tracer = FlutterOTel.tracer;
     final span = tracer.startSpan(
       'fetch_data',
       kind: SpanKind.client,
-      attributes:
-          <String, Object>{
-            'operation.type': 'network_request',
-            'endpoint': '/api/data',
-          }.toAttributes(),
+      attributes: OTel.attributesFromSemanticMap({
+        Http.requestMethod: 'GET',
+        Url.urlPath: '/api/data',
+        Url.urlScheme: 'https',
+      }),
     );
 
     try {
-      // Simulate network delay
-      await Future.delayed(const Duration(seconds: 2));
+      await tracer.withSpanAsync(span, () async {
+        // Simulate network delay. Any code inside this closure sees
+        // `Context.current.span == span` — including across the
+        // `await`.
+        await Future.delayed(const Duration(seconds: 2));
 
-      // Add event to the span
-      span.addEventNow(
-        'data_received',
-        {'bytes_received': 1024, 'response_code': 200}.toAttributes(),
-      );
-
-      // End span successfully
-      span.end();
+        // Successful response — set status attributes + record an
+        // event with the standard HTTP response keys.
+        span
+          ..setIntAttribute(Http.responseStatusCode.key, 200)
+          ..setIntAttribute(Http.responseBodySize.key, 1024)
+          ..addEventNow(
+            'data_received',
+            OTel.attributesFromSemanticMap({
+              Http.responseStatusCode: 200,
+              Http.responseBodySize: 1024,
+            }),
+          )
+          ..setStatus(SpanStatusCode.Ok);
+      });
     } catch (e, stackTrace) {
-      // Record error in span
-      span.recordException(e, stackTrace: stackTrace);
-      span.setStatus(SpanStatusCode.Error, e.toString());
-      span.end(); // End span with error
+      // `withSpanAsync` rethrows after the closure finishes — record
+      // the exception and set the error status here so the span
+      // carries both before we end it.
+      span
+        ..recordException(e, stackTrace: stackTrace)
+        ..setStatus(SpanStatusCode.Error, e.toString());
     } finally {
+      // End the span exactly once, regardless of which branch ran.
+      span.end();
       setState(() {
         _isLoading = false;
       });
@@ -111,7 +148,8 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        // Wrap with error boundary to catch rendering errors
+        // Wrap with error boundary to catch rendering errors as OTel
+        // span events / log records on the surrounding tracer/logger.
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -121,16 +159,17 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 20),
-            // Using widget extension to track user interaction
+            // Widget extension: emits an `interaction.*` span every
+            // time the button fires, plus an auto-log event when
+            // `enableAutoLogEvents: true` (the default).
             ElevatedButton(
               onPressed: _isLoading ? null : _simulateNetworkRequest,
-              child:
-                  _isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Simulate Network Request'),
+              child: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text('Simulate Network Request'),
             ).withOTelButtonTracking('network_request_button'),
             const SizedBox(height: 20),
-            // Using widget extension to track text input
+            // Text field tracking — fires on focus change + submit.
             TextField(
               decoration: const InputDecoration(
                 labelText: 'Enter something',

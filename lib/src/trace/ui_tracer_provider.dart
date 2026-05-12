@@ -90,6 +90,14 @@ class UITracerProvider implements TracerProvider {
   @override
   set sampler(Sampler? value) => _delegate.sampler = value;
 
+  // Added in SDK 1.1.0-beta.2 — platform-aware clock. See note in
+  // [UITracer.timeProvider].
+  @override
+  TimeProvider get timeProvider => _delegate.timeProvider;
+
+  @override
+  set timeProvider(TimeProvider value) => _delegate.timeProvider = value;
+
   @override
   bool get isShutdown => _delegate.isShutdown;
 

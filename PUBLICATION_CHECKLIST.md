@@ -1,185 +1,146 @@
 # Publication Checklist
 
-This document outlines the steps to follow when publishing a new version of the OpenTelemetry SDK for Flutter.
+This document outlines the steps to follow when publishing a new
+version of Flutterrific OpenTelemetry. Modeled on
+[`dartastic_opentelemetry`'s checklist][sdk-checklist] — same `-wip`
+release-script flow, with Flutter-specific additions for the
+platform-build matrix.
+
+[sdk-checklist]: https://github.com/MindfulSoftwareLLC/dartastic_opentelemetry/blob/main/PUBLICATION_CHECKLIST.md
 
 ## Pre-release Checklist
 
 ### Code Quality
 - [ ] All tests are passing (`flutter test`)
-- [ ] Code coverage is at acceptable levels (>85%)
 - [ ] No lint warnings (`flutter analyze`)
 - [ ] Code is properly formatted (`dart format .`)
-- [ ] Package scores well on `pana` analysis
-- [ ] Example app builds and runs on all supported platforms
+- [ ] Package scores well on `pana` analysis (`flutter pub global run pana`)
+- [ ] Example app builds and runs on the platforms you target
+- [ ] Code coverage measured via `tool/coverage.sh` (writes `coverage/lcov.info`); badge refreshed via `tool/update_coverage_badge.sh`
+
+Coverage target: aim for `>=85%` before any **stable** (non-beta) release. Pre-stable releases land with the actual coverage number in the README badge — honesty over greenwashing. See `ROADMAP.md` for the test-coverage roadmap toward the stable cut.
 
 ### Flutter-Specific Testing
-- [ ] Android build succeeds (`flutter build apk`)
-- [ ] iOS build succeeds (`flutter build ios`)
-- [ ] Web build succeeds (`flutter build web`)
-- [ ] Desktop builds succeed (when applicable)
-- [ ] Widget tests pass on all platforms
-- [ ] Integration tests pass (if available)
-- [ ] Performance tests show acceptable benchmarks
+Verify the package consumes cleanly on every target you intend to support:
+
+- [ ] Android (`flutter build apk` in the example app)
+- [ ] iOS (`flutter build ios --no-codesign`)
+- [ ] Web (`flutter build web` — uses Dartastic's auto-selected `WebTimeProvider` for sub-millisecond timing)
+- [ ] Desktop targets (`flutter build macos` / `linux` / `windows`) when applicable
+
+Notes:
+- Web target is the one most likely to surface regressions in the underlying SDK — Dartastic only declared its main library web-safe in `1.1.0-beta.1`. Verify span export works in a browser via the OTLP/HTTP-protobuf exporter (and OTLP/HTTP-JSON if your collector prefers that wire format — see SDK 1.1.0-beta.3).
+- iOS / Android tests on real devices are required for any release that touches platform-resource detection, lifecycle observers, or `package:web` usage.
 
 ### Documentation
-- [ ] Documentation is up-to-date with the current version
-- [ ] CHANGELOG.md is updated with all notable changes
-- [ ] Version numbers are updated in relevant files
-- [ ] Examples demonstrate current Flutter SDK usage and best practices
-- [ ] Widget integration examples are current
-- [ ] Platform-specific documentation is accurate
+- [ ] CHANGELOG entries for this release land under the `## [X.Y.Z-wip]` section (the release script dates and re-headers it).
+- [ ] `pubspec.yaml` version still ends in `-wip` — the release script strips it.
+- [ ] README "Quick Start" and any code snippets use the typed-enum semconv shorthand (e.g. `OTel.attributesFromSemanticMap({Http.requestMethod: 'GET'})`) rather than raw strings.
+- [ ] If this release moves a feature out of "experimental" status (notably any of the client-OTel namespaces — see README "Client OpenTelemetry" section), call that out explicitly in the CHANGELOG.
 
 ### Compatibility
-- [ ] Breaking changes are documented and follow versioning policy
-- [ ] Compatibility with the OpenTelemetry specification is verified
-- [ ] Compatibility with underlying Dart OpenTelemetry SDK is maintained
-- [ ] Platform-specific compatibility is tested (Android, iOS, Web, Desktop)
-- [ ] Flutter version compatibility is verified
-- [ ] Third-party navigation package integrations work correctly
-
-### Continuous Integration
-- [ ] All CI checks pass on the main branch
-- [ ] All dependencies are up-to-date and secure
-- [ ] Integration with OpenTelemetry Collector is tested
-- [ ] Multi-platform builds succeed in CI
-- [ ] Coverage reports are generated successfully
+- [ ] Breaking changes are documented in CHANGELOG with a one-line migration recipe.
+- [ ] `dartastic_opentelemetry` / `dartastic_opentelemetry_api` constraints in `pubspec.yaml` match the versions exercised in the test run. If you depend on an unreleased Dartastic beta via a `dependency_overrides:` git ref, the SDK / API need to publish to pub.dev *before* this package can be released — pub.dev's resolver refuses git refs from published packages.
+- [ ] Compatible with the [OpenTelemetry specification](https://opentelemetry.io/docs/specs/otel/) and its in-development client/RUM semantic conventions (see README "Client OpenTelemetry" for the comparison).
+- [ ] Flutter SDK constraint in `pubspec.yaml` matches what was tested.
 
 ## Release Process
 
-### 1. Prepare Release
-- [ ] Update version in `pubspec.yaml`
-- [ ] Update version in example app's `pubspec.yaml`
-- [ ] Update CHANGELOG.md with release date and changes
-- [ ] Update any version references in documentation
-- [ ] Create a git tag for the version (e.g., `git tag v0.3.0`)
-- [ ] Push the tag to the repository (`git push origin v0.3.0`)
+Flutterrific follows the Flutter / Dart team's `-wip` convention. The
+working `pubspec.yaml` version always ends in `-wip` and CHANGELOG
+entries land under a `## [X.Y.Z-wip]` section header during
+development. `dart run tool/release.dart` performs the release.
 
-### 2. Pre-publication Verification
-- [ ] Run final `flutter pub publish --dry-run` check
-- [ ] Verify pub.dev score predictions
-- [ ] Test example app with the new version
-- [ ] Verify all supported platforms work with example app
-- [ ] Check that all required files are included in the package
+1. **Prepare**
+   - [ ] Working tree is clean and on `main` (or the release branch).
+   - [ ] CHANGELOG `## [X.Y.Z-wip]` section reflects everything in this release.
+   - [ ] `dart pub publish --dry-run` is clean.
 
-### 3. Publish to pub.dev
-- [ ] Publish with `flutter pub publish`
-- [ ] Verify package appears correctly on pub.dev
-- [ ] Check that documentation renders properly on pub.dev
-- [ ] Verify example code works when copied from pub.dev
+2. **Cut + publish** — run `dart run tool/release.dart`. The script:
+   - Strips `-wip` from `pubspec.yaml` and the CHANGELOG header, dates the section.
+   - Runs `flutter pub get`, `flutter analyze`, `flutter test`.
+   - Commits as `Release X.Y.Z` and tags `vX.Y.Z`.
+   - Bumps `pubspec.yaml` to the next `-wip` (auto-bumps the rightmost numeric component, or pass `--next X.Y.Z` to override).
+   - Inserts a fresh `## [X.Y.Z-wip]` CHANGELOG section.
+   - Commits as `Bump to X.Y.Z-wip`.
+   - Checks out the `vX.Y.Z` tag and runs `dart pub publish` so the working tree being published matches the release version. pub.dev's own `Do you want to publish ...?` prompt is the gate.
+   - Returns the working tree to your branch on success.
+   - (If `gh` CLI is installed and authenticated) pushes the branch + tag and creates a GitHub release from the matching CHANGELOG section.
 
-### 4. Post-Release
-- [ ] Create a GitHub release with release notes
-- [ ] Update example apps to use the new version
-- [ ] Announce in appropriate Flutter community channels (if applicable)
-- [ ] Update documentation website (if applicable)
-- [ ] Increment to next development version
-- [ ] Update any dependent packages to use the new version
-- [ ] Notify users of any migration requirements
+   Flags:
+   - `--yes` — non-interactive confirm
+   - `--no-publish` — local commits + tag only, no pub.dev push
+   - `--skip-tests` — skip `flutter test` (useful when CI already verified)
+   - `--no-github-release` — skip the gh release step
+   - `--next X.Y.Z` — override the auto-bumped next dev version
 
-## Flutter-Specific Release Considerations
+3. **Verify** (after `dart pub publish` succeeds):
+   - [ ] Package shows on pub.dev within ~1 minute.
+   - [ ] pub.dev's analyzer score is acceptable (warnings on the rendered page are common but should not be net-new errors).
+   - [ ] Example app `flutter pub get` resolves the new version on a fresh clone.
 
-### Platform Testing
-- [ ] Test on real Android devices (multiple API levels)
-- [ ] Test on real iOS devices (multiple iOS versions)
-- [ ] Test in web browsers (Chrome, Safari, Firefox)
-- [ ] Test on desktop platforms (if supported)
-- [ ] Verify performance on different device classes
+4. **Post-release**
+   - [ ] If this release is consumed by downstream projects (Dartastic sample apps, etc.), open follow-up PRs to bump them.
+   - [ ] Announce in Flutter community channels for any user-facing wins (web support, new auto-instrumentation, etc.).
+   - [ ] If migration is required, link the relevant CHANGELOG section in the release notes.
 
-### Framework Integration
-- [ ] Test with latest stable Flutter release
-- [ ] Test with Flutter beta (if possible)
-- [ ] Verify navigation integrations work correctly
-- [ ] Test widget extensions and tracking
-- [ ] Verify app lifecycle tracking works across platforms
+## Flutter-Specific Considerations
 
-### Ecosystem Compatibility
-- [ ] Test with popular state management solutions
-- [ ] Verify compatibility with common navigation packages
-- [ ] Test with popular networking packages
-- [ ] Check integration with crash reporting tools
+### Platform compatibility
+- [ ] Tested with the current stable Flutter release.
+- [ ] Tested with Flutter beta, when time allows.
+- [ ] `OTelNavigatorObserver` works alongside `go_router` (default integration) and standalone `MaterialApp` navigation.
+- [ ] App-lifecycle observer fires on Android, iOS, and web.
+- [ ] Web build does not break on `dart:io`-only paths — the SDK's web facade should keep things safe but verify on every release.
+
+### Ecosystem
+- [ ] Verified with common navigation packages (`go_router`, `auto_route` if a user reports needing it).
+- [ ] Verified with common state-management packages — pure consumers; we don't reach into their internals.
+- [ ] If we add a new auto-instrumentation, it must be opt-out (a setting on `FlutterOTel.initialize`).
 
 ## Emergency Fixes
 
 If an emergency fix is required for a released version:
 
-1. Create a hotfix branch from the tagged release
-2. Make minimal required changes
-3. Test thoroughly on affected platforms
-4. Follow the standard release process but increment the PATCH version
-5. Merge the fix back to the main branch if applicable
-6. Consider backporting to other supported versions
+1. Create a hotfix branch from the tagged release (`git checkout -b hotfix/X.Y.Z+1 vX.Y.Z`).
+2. Apply the minimal fix.
+3. Update the CHANGELOG with a `## [X.Y.Z+1-wip]` section describing the fix.
+4. Set `pubspec.yaml` to `X.Y.Z+1-wip`.
+5. Run `dart run tool/release.dart`.
+6. Merge the hotfix branch back to `main` (the new commits should fast-forward).
 
 ## CNCF Contribution Considerations
 
-If preparing for CNCF contribution:
+If preparing this package for CNCF contribution (as part of the
+Dartastic / Flutterrific donation in flight):
 
-- [ ] Ensure all legal requirements are met (license, CLAs, etc.)
-- [ ] Review contribution guidelines for the OpenTelemetry organization
-- [ ] Prepare documentation specifically required for CNCF review
-- [ ] Verify compatibility with other OpenTelemetry implementations
-- [ ] Ensure governance documents are complete and current
-- [ ] Review security policies and procedures
-- [ ] Verify project follows CNCF graduation criteria
+- [ ] Legal requirements satisfied (license, NOTICE, CLAs).
+- [ ] Governance docs current (`GOVERNANCE.md`, `CONTRIBUTING.md`, `SECURITY.md`).
+- [ ] No vendor lock-in in defaults; the package works against any OTLP-compatible backend.
+- [ ] Compatibility with [OpenTelemetry semantic conventions](https://github.com/open-telemetry/semantic-conventions) verified — especially the client/browser/mobile namespaces (currently `Development` status; track stabilization in the README "Client OpenTelemetry" section).
 
 ## Quality Gates
 
-Before any release, ensure:
+### Code
+- [ ] Test coverage trending up release-over-release (target: `>=85%` for the stable cut).
+- [ ] No critical security vulnerabilities (`dart pub deps` + `pub.dev` advisories clean).
+- [ ] Package size reasonable for Flutter apps (`dart pub publish --dry-run` shows the file manifest).
 
-### Code Quality Gates
-- [ ] Test coverage >85%
-- [ ] No critical security vulnerabilities
-- [ ] Performance benchmarks meet standards
-- [ ] Memory usage is within acceptable limits
-- [ ] Package size is reasonable for Flutter applications
+### Documentation
+- [ ] All public APIs have at least a one-line docstring.
+- [ ] Breaking changes have a one-line migration in the CHANGELOG.
+- [ ] README's "Client OpenTelemetry" section reflects the *current* spec status for each namespace.
+- [ ] `example/` builds and runs.
 
-### Documentation Gates
-- [ ] All public APIs are documented
-- [ ] Migration guides exist for breaking changes
-- [ ] Examples are tested and working
-- [ ] Platform-specific considerations are documented
+### Community
+- [ ] Open issues triaged.
+- [ ] Breaking changes pre-discussed in an issue or PR before this release.
 
-### Community Gates
-- [ ] Open issues have been triaged
-- [ ] Community feedback has been addressed
-- [ ] Breaking changes have been discussed with users
-- [ ] Deprecation warnings have been in place for appropriate time
+## Rollback
 
-## Rollback Plan
+If a problem is discovered after release:
 
-If issues are discovered after release:
-
-1. **Immediate Response**
-   - [ ] Assess severity of the issue
-   - [ ] Determine if rollback is necessary
-   - [ ] Communicate with users via GitHub and pub.dev
-
-2. **Rollback Process**
-   - [ ] Retract the problematic version (if possible)
-   - [ ] Release a fixed version immediately
-   - [ ] Update documentation with workarounds
-   - [ ] Notify users of the issue and resolution
-
-3. **Post-Mortem**
-   - [ ] Analyze what went wrong
-   - [ ] Update testing procedures to prevent recurrence
-   - [ ] Improve CI/CD pipeline if necessary
-   - [ ] Document lessons learned
-
-## Release Communication
-
-### Internal Communication
-- [ ] Notify maintainers of pending release
-- [ ] Coordinate with dependent project maintainers
-- [ ] Update internal tracking systems
-
-### External Communication
-- [ ] Prepare release notes for GitHub
-- [ ] Update social media accounts (if applicable)
-- [ ] Notify Flutter community channels
-- [ ] Update blog posts or articles (if applicable)
-
-### User Communication
-- [ ] Clear migration instructions for breaking changes
-- [ ] Highlight new features and improvements
-- [ ] Provide troubleshooting information
-- [ ] Include performance improvements and metrics
+1. **Triage** — assess severity. For most issues, ship a patch release rather than retracting.
+2. **Patch** — follow the emergency-fix flow above for a `X.Y.Z+1`.
+3. **Retract** (last resort) — `dart pub retract X.Y.Z` and immediately publish the patch. Note retraction is reversible within 7 days but visible to consumers.
+4. **Postmortem** — write up what went wrong, what test would have caught it, file the test as an issue.
