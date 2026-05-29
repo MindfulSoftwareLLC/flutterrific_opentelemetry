@@ -56,6 +56,9 @@ class UITracer implements sdk.Tracer {
   get provider => _provider;
 
   @override
+  TimeProvider get timeProvider => _delegate.timeProvider;
+
+  @override
   sdk.Resource? get resource => _provider.resource;
 
   UISpan createUISpan({
@@ -384,34 +387,38 @@ class UITracer implements sdk.Tracer {
   @override
   api.APISpan? get currentSpan => _delegate.currentSpan;
 
-  @override
   T recordSpan<T>({
     required String name,
     required T Function() fn,
     SpanKind kind = SpanKind.internal,
     Attributes? attributes,
   }) {
-    return _delegate.recordSpan(
-      name: name,
-      fn: fn,
-      kind: kind,
-      attributes: attributes,
-    );
+    final span = startSpan(name, kind: kind, attributes: attributes);
+    try {
+      final result = fn();
+      span.end();
+      return result;
+    } catch (e) {
+      span.end();
+      rethrow;
+    }
   }
 
-  @override
   Future<T> recordSpanAsync<T>({
     required String name,
     required Future<T> Function() fn,
     SpanKind kind = SpanKind.internal,
     Attributes? attributes,
-  }) {
-    return _delegate.recordSpanAsync(
-      name: name,
-      fn: fn,
-      kind: kind,
-      attributes: attributes,
-    );
+  }) async {
+    final span = startSpan(name, kind: kind, attributes: attributes);
+    try {
+      final result = await fn();
+      span.end();
+      return result;
+    } catch (e) {
+      span.end();
+      rethrow;
+    }
   }
 
   @override
@@ -444,19 +451,13 @@ class UITracer implements sdk.Tracer {
     );
   }
 
-  @override
   api.APISpan startSpanWithContext({
     required String name,
     required Context context,
     SpanKind kind = SpanKind.internal,
     Attributes? attributes,
   }) {
-    return _delegate.startSpanWithContext(
-      name: name,
-      context: context,
-      kind: kind,
-      attributes: attributes,
-    );
+    return startSpan(name, context: context, kind: kind, attributes: attributes);
   }
 
   @override
